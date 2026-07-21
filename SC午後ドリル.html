@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SC午後ドリル — 情報処理安全確保支援士 演習</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F5EF;
+  --paper-line:#DDD8CC;
+  --ink:#1E2A3A;
+  --ink-soft:#5A6472;
+  --shu:#D93A1C;        /* 朱色 採点ペン */
+  --shu-soft:#F6DED6;
+  --kon:#27547D;        /* 紺 設問インク */
+  --ok:#2E7D5B;
+  --card:#FFFFFF;
+  --radius:10px;
+  --serif:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);color:var(--ink);background:var(--paper);
+  background-image:repeating-linear-gradient(transparent,transparent 31px,rgba(90,100,114,.06) 31px,rgba(90,100,114,.06) 32px);
+  min-height:100vh;line-height:1.7;
+}
+.wrap{max-width:780px;margin:0 auto;padding:20px 16px 80px}
+header.site{display:flex;align-items:baseline;gap:12px;border-bottom:3px double var(--ink);padding:10px 2px 12px;margin-bottom:20px}
+header.site h1{font-family:var(--serif);font-size:1.45rem;letter-spacing:.06em}
+header.site h1 .shu{color:var(--shu)}
+header.site .sub{font-size:.72rem;color:var(--ink-soft);letter-spacing:.12em}
+.view{display:none}
+.view.active{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- ダッシュボード ---------- */
+.stats-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--paper-line);border-radius:var(--radius);padding:12px 10px;text-align:center}
+.stat .num{font-family:var(--serif);font-size:1.7rem;font-weight:700;color:var(--kon)}
+.stat .num.shu{color:var(--shu)}
+.stat .lbl{font-size:.68rem;color:var(--ink-soft);letter-spacing:.08em}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px}
+.mode-btn{border:1.5px solid var(--ink);background:var(--card);border-radius:var(--radius);padding:14px 12px;text-align:left;cursor:pointer;font-family:var(--sans);transition:box-shadow .15s, transform .15s}
+.mode-btn:hover{box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}
+.mode-btn:focus-visible{outline:3px solid var(--shu);outline-offset:2px}
+.mode-btn .t{font-weight:700;font-size:.95rem}
+.mode-btn .d{font-size:.72rem;color:var(--ink-soft)}
+.mode-btn.primary{background:var(--ink);color:#fff}
+.mode-btn.primary .d{color:#C9CFD8}
+h2.sec{font-family:var(--serif);font-size:1.05rem;border-left:5px solid var(--shu);padding-left:10px;margin:26px 0 12px;letter-spacing:.05em}
+.theme-list{display:flex;flex-direction:column;gap:8px}
+.theme-card{background:var(--card);border:1px solid var(--paper-line);border-radius:var(--radius);padding:12px 14px;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;transition:border-color .15s}
+.theme-card:hover{border-color:var(--kon)}
+.theme-card:focus-visible{outline:3px solid var(--shu);outline-offset:2px}
+.theme-card .name{font-weight:700;font-size:.9rem}
+.theme-card .meta{font-size:.7rem;color:var(--ink-soft)}
+.theme-card .acc{font-family:var(--serif);font-size:1.15rem;font-weight:700;grid-row:span 2;text-align:right;min-width:64px}
+.acc.good{color:var(--ok)} .acc.mid{color:var(--kon)} .acc.bad{color:var(--shu)} .acc.none{color:var(--paper-line)}
+.bar{grid-column:1 / -1;height:7px;background:var(--paper);border-radius:4px;overflow:hidden;border:1px solid var(--paper-line);position:relative}
+.bar .fill{height:100%;background:var(--kon);border-radius:4px;transition:width .4s ease}
+.bar .fill.correct{background:var(--ok)}
+.history{font-size:.78rem;color:var(--ink-soft)}
+.history table{width:100%;border-collapse:collapse}
+.history td,.history th{padding:6px 4px;border-bottom:1px dashed var(--paper-line);text-align:left}
+.history th{font-weight:500;font-size:.7rem;letter-spacing:.08em}
+.history .score{font-family:var(--serif);color:var(--ink);font-weight:700}
+.danger-zone{margin-top:34px;text-align:right}
+.link-btn{background:none;border:none;color:var(--ink-soft);font-size:.72rem;text-decoration:underline;cursor:pointer;font-family:var(--sans)}
+.empty-note{background:var(--card);border:1px dashed var(--paper-line);border-radius:var(--radius);padding:16px;font-size:.82rem;color:var(--ink-soft);text-align:center}
+
+/* ---------- 出題画面 ---------- */
+.quiz-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:.78rem;color:var(--ink-soft)}
+.quiz-head .theme-tag{background:var(--kon);color:#fff;border-radius:4px;padding:2px 10px;font-size:.72rem;letter-spacing:.05em}
+.progress-dots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--paper-line);background:var(--card)}
+.dot.now{border-color:var(--ink);background:var(--ink)}
+.dot.ok{border-color:var(--shu);background:var(--shu-soft);position:relative}
+.dot.ok::after{content:"";position:absolute;inset:2px;border:1.5px solid var(--shu);border-radius:50%}
+.dot.ng{border-color:var(--ink-soft);background:var(--paper-line)}
+.q-card{background:var(--card);border:1px solid var(--paper-line);border-radius:var(--radius);padding:20px 18px;position:relative;overflow:hidden}
+.q-no{font-family:var(--serif);color:var(--kon);font-weight:700;font-size:.9rem;letter-spacing:.1em;margin-bottom:6px}
+.q-text{font-size:.95rem;font-weight:500;margin-bottom:16px;white-space:pre-wrap}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{display:flex;gap:10px;align-items:flex-start;border:1.5px solid var(--paper-line);border-radius:8px;padding:10px 12px;background:var(--card);cursor:pointer;font-size:.87rem;text-align:left;font-family:var(--sans);transition:border-color .12s,background .12s;width:100%}
+.choice:hover:not(:disabled){border-color:var(--kon)}
+.choice:focus-visible{outline:3px solid var(--shu);outline-offset:1px}
+.choice .mark{font-family:var(--serif);font-weight:700;color:var(--kon);flex:none}
+.choice.sel-correct{border-color:var(--shu);background:var(--shu-soft)}
+.choice.sel-wrong{border-color:var(--ink-soft);background:#EEECE6;text-decoration:line-through;text-decoration-color:rgba(30,42,58,.4)}
+.choice.reveal-correct{border-color:var(--shu);background:var(--shu-soft)}
+.choice:disabled{cursor:default;opacity:.92}
+/* 朱色の採点マーク */
+.grade-mark{position:absolute;top:6px;right:10px;width:84px;height:84px;pointer-events:none}
+.grade-mark svg{width:100%;height:100%}
+.grade-mark path{fill:none;stroke:var(--shu);stroke-width:7;stroke-linecap:round;opacity:.85}
+.grade-mark.draw path{stroke-dasharray:400;stroke-dashoffset:400;animation:draw .5s ease forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.expl{margin-top:16px;border-top:1px dashed var(--paper-line);padding-top:12px;font-size:.83rem;display:none}
+.expl.show{display:block;animation:fadein .3s ease}
+.expl .verdict{font-family:var(--serif);font-weight:700;font-size:1rem;margin-bottom:4px}
+.expl .verdict.ok{color:var(--shu)}
+.expl .verdict.ng{color:var(--ink-soft)}
+.expl .body{color:var(--ink)}
+.expl .src{margin-top:6px;font-size:.72rem;color:var(--ink-soft)}
+.quiz-actions{margin-top:16px;display:flex;justify-content:space-between;align-items:center}
+.btn{border:1.5px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:10px 22px;font-size:.88rem;font-weight:700;cursor:pointer;font-family:var(--sans)}
+.btn:hover{background:var(--kon);border-color:var(--kon)}
+.btn:focus-visible{outline:3px solid var(--shu);outline-offset:2px}
+.btn.ghost{background:none;color:var(--ink-soft);border-color:var(--paper-line);font-weight:500}
+.btn.ghost:hover{color:var(--ink);border-color:var(--ink);background:none}
+.btn:disabled{opacity:.4;cursor:default}
+
+/* ---------- 結果画面 ---------- */
+.result-card{background:var(--card);border:1.5px solid var(--ink);border-radius:var(--radius);padding:28px 20px;text-align:center;position:relative}
+.result-card .big{font-family:var(--serif);font-size:3rem;font-weight:700;color:var(--shu)}
+.result-card .big small{font-size:1.2rem;color:var(--ink)}
+.result-card .msg{font-size:.9rem;margin-top:4px}
+.result-card .detail{margin-top:14px;font-size:.78rem;color:var(--ink-soft)}
+.result-actions{display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+.wrong-review{margin-top:22px;text-align:left}
+.wrong-review h3{font-family:var(--serif);font-size:.95rem;margin-bottom:8px}
+.wrong-item{background:var(--card);border:1px solid var(--paper-line);border-left:4px solid var(--shu);border-radius:8px;padding:10px 12px;font-size:.8rem;margin-bottom:8px}
+.wrong-item .qq{font-weight:700;margin-bottom:2px}
+.wrong-item .aa{color:var(--shu);font-weight:700}
+@media(max-width:520px){
+  .modes{grid-template-columns:1fr}
+  .stats-strip{gap:7px}
+  .stat .num{font-size:1.4rem}
+  .grade-mark{width:64px;height:64px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <noscript><div style="background:#FBEAE5;border:1px solid #D93A1C;border-radius:8px;padding:12px;margin-bottom:14px;font-size:.85rem">JavaScriptが無効のため動作しません。ブラウザ(Chrome、Edge、Safariなど)でこのファイルを開いてください。スマートフォンの「ファイル」アプリのプレビューではJavaScriptが動かないため、白い画面やボタンが反応しない状態になります。</div></noscript>
+  <div id="boot-error" style="display:none;background:#FBEAE5;border:1px solid #D93A1C;border-radius:8px;padding:12px;margin-bottom:14px;font-size:.85rem"></div>
+  <header class="site">
+    <h1>SC午後<span class="shu">ドリル</span></h1>
+    <span class="sub">情報処理安全確保支援士 — テーマ別演習帳</span>
+  </header>
+
+  <!-- ホーム -->
+  <section id="view-home" class="view active">
+    <div class="stats-strip">
+      <div class="stat"><div class="num" id="st-total">0</div><div class="lbl">累計解答数</div></div>
+      <div class="stat"><div class="num shu" id="st-acc">—</div><div class="lbl">通算正答率</div></div>
+      <div class="stat"><div class="num" id="st-days">0</div><div class="lbl">学習日数</div></div>
+    </div>
+    <div class="modes">
+      <button class="mode-btn primary" onclick="startQuiz('random')">
+        <div class="t">ランダム10問</div><div class="d">全テーマから頻出ウェイトで出題</div>
+      </button>
+      <button class="mode-btn" onclick="startQuiz('weak')">
+        <div class="t">弱点復習</div><div class="d">誤答・低正答率の問題を優先出題</div>
+      </button>
+    </div>
+    <h2 class="sec">テーマ別ドリル(出題頻度順)</h2>
+    <div class="theme-list" id="theme-list"></div>
+    <h2 class="sec">最近の取組</h2>
+    <div class="history" id="history"></div>
+    <div class="danger-zone"><button class="link-btn" onclick="resetData()">成績データをリセット</button></div>
+  </section>
+
+  <!-- 出題 -->
+  <section id="view-quiz" class="view">
+    <div class="quiz-head">
+      <span class="theme-tag" id="q-theme"></span>
+      <span id="q-counter"></span>
+    </div>
+    <div class="progress-dots" id="q-dots"></div>
+    <div class="q-card">
+      <div class="grade-mark" id="grade-mark"></div>
+      <div class="q-no" id="q-no"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="choices" id="q-choices"></div>
+      <div class="expl" id="q-expl">
+        <div class="verdict" id="q-verdict"></div>
+        <div class="body" id="q-expl-body"></div>
+        <div class="src" id="q-src"></div>
+      </div>
+    </div>
+    <div class="quiz-actions">
+      <button class="btn ghost" onclick="quitQuiz()">中断して戻る</button>
+      <button class="btn" id="btn-next" onclick="nextQuestion()" disabled>次の問題へ</button>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="view-result" class="view">
+    <div class="result-card">
+      <div class="grade-mark draw" style="position:absolute;top:-6px;left:2px">
+        <svg viewBox="0 0 100 100"><path d="M50 12 A38 38 0 1 1 49.9 12"/></svg>
+      </div>
+      <div class="big"><span id="r-score">0</span><small> / <span id="r-total">0</span></small></div>
+      <div class="msg" id="r-msg"></div>
+      <div class="detail" id="r-detail"></div>
+      <div class="result-actions">
+        <button class="btn" onclick="retrySame()">同じ条件でもう一度</button>
+        <button class="btn ghost" onclick="goHome()">ホームへ戻る</button>
+      </div>
+    </div>
+    <div class="wrong-review" id="r-wrong"></div>
+  </section>
+</div>
+<script>
+// SC午後ドリル 問題バンク(過去問出題傾向分析に基づく10テーマ×10問)
+const THEMES = [
+  {id:"web",     name:"Webアプリの脆弱性と対策", weight:20, desc:"XSS・SQLi・CSRF・SSRFなど 毎回出題の最重要分野"},
+  {id:"incident",name:"インシデント対応・ログ分析", weight:15, desc:"時系列調査・封じ込め・CSIRT ほぼ毎回出題"},
+  {id:"code",    name:"セキュアプログラミング", weight:10, desc:"コードレビュー型設問の知識基盤"},
+  {id:"auth",    name:"認証・認可", weight:10, desc:"OAuth/OIDC・FIDO・多要素認証 増加傾向"},
+  {id:"cloud",   name:"クラウド・CI/CDセキュリティ", weight:8, desc:"R5秋以降の重点分野 SaaS設定・責任共有"},
+  {id:"malware", name:"マルウェア対策", weight:8, desc:"ランサムウェア・標的型攻撃・EDR"},
+  {id:"network", name:"ネットワークセキュリティ", weight:8, desc:"FW・LAN分離・プロキシ・無線LAN"},
+  {id:"mail",    name:"メール・DNSセキュリティ", weight:7, desc:"SPF/DKIM/DMARC・DNS運用 周期的に出題"},
+  {id:"crypto",  name:"暗号・PKI・TLS", weight:7, desc:"証明書運用・鍵管理・TLS設定"},
+  {id:"mgmt",    name:"脆弱性管理・マネジメント", weight:7, desc:"CVSS・SBOM・リスクアセスメント R7で急増"}
+];
+
+const QUESTIONS = [
+// ================= web =================
+{id:"web01",theme:"web",q:"反射型XSSと格納型XSSの違いとして、最も適切なものはどれか。",
+c:["反射型は攻撃文字列がリクエストに含まれて即座に応答へ反映されるが、格納型はサーバに保存された攻撃文字列が後から閲覧者に配信される",
+"反射型はJavaScriptを使うが、格納型はHTMLタグのみを使う",
+"反射型はCookieを窃取できないが、格納型はCookieを窃取できる",
+"反射型はPOSTリクエストのみで成立し、格納型はGETリクエストのみで成立する"],
+a:0,e:"反射型(Reflected)XSSは細工したURLを踏ませて攻撃文字列を応答に反映させる。格納型(Stored)XSSは掲示板投稿などでサーバ側に保存され、閲覧した全利用者が被害を受けるため影響範囲が広い。",s:"Webサイトのセキュリティ(H31春・R4春ほか)で頻出"},
+{id:"web02",theme:"web",q:"XSS対策の基本として最も適切なものはどれか。",
+c:["HTML出力時に「<」「>」「&」「\"」などを文字参照へエスケープする",
+"入力値から「script」という文字列を削除する",
+"通信をTLSで暗号化する",
+"セッションIDをURLに含めない"],
+a:0,e:"XSSの根本対策は出力時のエスケープ(サニタイジング)。ブラックリスト式の文字列削除は「scrscriptipt」のような回避が可能で不十分。TLSは盗聴対策でありXSSは防げない。",s:"午後の記述設問でも「出力時にエスケープ」は定番解答"},
+{id:"web03",theme:"web",q:"SQLインジェクションの最も効果的な対策はどれか。",
+c:["プレースホルダを用いたプリペアドステートメントでSQL文を組み立てる",
+"入力欄の文字数を制限する",
+"シングルクォートを入力禁止にする",
+"WAFを導入し検査パターンを設定する"],
+a:0,e:"プリペアドステートメント(バインド機構)ではSQL文の構造が先に確定し、入力値は常にデータとして扱われるため根本対策となる。文字制限やWAFは緩和策・保険的対策に位置づけられる。",s:"シラバス2-5 セキュアプログラミング/Web開発問題で頻出"},
+{id:"web04",theme:"web",q:"CSRF(クロスサイトリクエストフォージェリ)攻撃の説明として適切なものはどれか。",
+c:["ログイン済み利用者に攻撃者が用意したリクエストを送信させ、利用者の意図しない処理を実行させる",
+"Webサーバの応答に偽のスクリプトを注入し、利用者のブラウザで実行させる",
+"セッションIDを推測して他人になりすます",
+"データベースへ不正なSQL文を送り込み情報を窃取する"],
+a:0,e:"CSRFは被害者のブラウザが保持する認証状態(Cookie)を悪用し、罠サイト経由で送金・退会などの処理を強制する攻撃。対策はトークン(CSRFトークン)の照合や重要処理前の再認証。",s:"Webサイトのセキュリティ問題で周期的に出題"},
+{id:"web05",theme:"web",q:"SSRF(サーバサイドリクエストフォージェリ)で攻撃者が狙う典型的な対象はどれか。",
+c:["クラウド環境のメタデータサービス(169.254.169.254)など、外部から直接アクセスできない内部リソース",
+"利用者のブラウザに保存されたCookie",
+"DNSキャッシュサーバの設定ファイル",
+"公開Webサーバの静的コンテンツ"],
+a:0,e:"SSRFはURLを受け取って取得するサーバ側機能を悪用し、サーバを踏み台に内部ネットワークやクラウドのメタデータAPIへアクセスさせる。認証情報(一時クレデンシャル)の窃取につながる。対策はURLの検証や内部宛て通信の遮断。",s:"R5以降の新傾向。クラウド関連問題で登場"},
+{id:"web06",theme:"web",q:"セッションIDの管理として不適切なものはどれか。",
+c:["ログイン成功後もログイン前と同じセッションIDを使い続ける",
+"セッションIDを推測困難な乱数で生成する",
+"CookieにSecure属性とHttpOnly属性を付与する",
+"一定時間操作がない場合にセッションを無効化する"],
+a:0,e:"ログイン前後でセッションIDを変更しないと、攻撃者が事前に固定したIDでなりすますセッションフィクセーション攻撃が成立する。ログイン成功時にセッションIDを再発行するのが対策。",s:"セッション管理は記述式設問の定番"},
+{id:"web07",theme:"web",q:"CookieのHttpOnly属性を付与する目的はどれか。",
+c:["JavaScriptからのCookie読出しを禁止し、XSSによるセッションID窃取の被害を軽減する",
+"HTTPS通信のときだけCookieを送信させる",
+"同一サイトからのリクエストにのみCookieを付与する",
+"Cookieの有効期限を短くする"],
+a:0,e:"HttpOnly属性を付けるとdocument.cookieでの読出しができなくなり、XSSが成立してもセッションIDの直接窃取を防げる。HTTPS限定はSecure属性、送信元制限はSameSite属性の役割。",s:"属性3兄弟(Secure/HttpOnly/SameSite)の区別は頻出"},
+{id:"web08",theme:"web",q:"ディレクトリトラバーサル攻撃の説明として適切なものはどれか。",
+c:["「../」などの文字列を含むパス名を送信し、公開範囲外のファイルを不正に読み出す",
+"Webサーバのディレクトリ一覧表示機能を無効化する",
+"URLのクエリ文字列にSQL文を埋め込む",
+"大量のリクエストでディレクトリ構造を総当たりする"],
+a:0,e:"ファイル名をパラメータで受け取る処理で「../../etc/passwd」のような相対パスを与え、想定外のファイルへアクセスする攻撃。対策はパス名の正規化後の検証や、ファイル名にディレクトリ指定を含めない設計。",s:"シラバス2-5/Web診断問題で出題"},
+{id:"web09",theme:"web",q:"Webアプリケーションの脆弱性診断に関する記述のうち、適切なものはどれか。",
+c:["ツールによる自動診断と手動診断を組み合わせると、ロジックの欠陥など自動検出が難しい脆弱性も発見しやすくなる",
+"自動診断ツールを使えば全ての脆弱性を検出できるため手動診断は不要である",
+"診断は本番環境のみで行い、検証環境では行うべきでない",
+"診断で脆弱性が検出されなければ、以後の診断は不要である"],
+a:0,e:"認可制御の不備や業務ロジックの欠陥はツールでは検出困難で、手動診断との組合せが有効。診断は原則として検証環境や合意した時間帯で行い、リリース時や改修時に繰り返し実施する。",s:"セキュリティ診断(R2 PM1問3・R6秋問4)で出題"},
+{id:"web10",theme:"web",q:"認可制御の不備(IDOR)に該当する事象はどれか。",
+c:["URL中の注文番号を他人のものに書き換えると、他人の注文詳細が表示された",
+"パスワードを5回間違えるとアカウントがロックされた",
+"HTTPSでない接続がHTTPSへリダイレクトされた",
+"退会済み利用者のログインが拒否された"],
+a:0,e:"IDOR(Insecure Direct Object Reference)は、リソース識別子を書き換えるだけで他人のデータへアクセスできてしまう認可不備。画面遷移だけでなくAPI単位で、リソースの所有者とログイン利用者の一致をサーバ側で検証する必要がある。",s:"APIセキュリティ(R6春問1)の中心論点"},
+
+// ================= code =================
+{id:"code01",theme:"code",q:"プリペアドステートメントを使用してもSQLインジェクション対策にならないケースはどれか。",
+c:["テーブル名やORDER BY句の列名を利用者入力から動的に組み立てている場合",
+"数値型の入力値をバインドしている場合",
+"文字列型の入力値をバインドしている場合",
+"検索条件が複数ある場合"],
+a:0,e:"プレースホルダにバインドできるのは値のみで、テーブル名・列名・ソート順などSQL文の構造部分には使えない。これらを入力から組み立てる場合は許可リストによる検証が必要。",s:"コードレビュー型設問で問われる応用論点"},
+{id:"code02",theme:"code",q:"OSコマンドインジェクションの根本的な対策はどれか。",
+c:["シェルを経由するコマンド呼出し関数を使わず、ライブラリ関数など代替手段で実装する",
+"入力値の文字数を制限する",
+"コマンドの実行結果を画面に表示しない",
+"Webサーバをroot権限で実行しない"],
+a:0,e:"system()等のシェル経由呼出しは「;」「|」などで別コマンドを注入されるおそれがある。シェルを介さないAPIや言語標準ライブラリで同じ処理を実装するのが根本対策。権限最小化は被害低減策。",s:"シラバス2-5。ソースコード修正の記述問題で出題"},
+{id:"code03",theme:"code",q:"パスワードをデータベースに保存する方法として最も適切なものはどれか。",
+c:["利用者ごとに異なるソルトを付加し、ストレッチングを行ったハッシュ値を保存する",
+"共通鍵暗号で暗号化して保存する",
+"MD5でハッシュ化して保存する",
+"Base64でエンコードして保存する"],
+a:0,e:"ソルトによりレインボーテーブル攻撃と同一パスワードの同一ハッシュ化を防ぎ、ストレッチング(反復計算)で総当たりを遅くする。bcryptやPBKDF2などが該当。可逆な暗号化やMD5、単なるエンコードは不適切。",s:"認証システムの開発(R3春問1)などで出題"},
+{id:"code04",theme:"code",q:"レースコンディション(TOCTOU)脆弱性の説明として適切なものはどれか。",
+c:["資源の検査と使用の間に他の処理が割り込むことで、検査結果と実際の状態が食い違い不正が成立する",
+"再帰呼出しが深くなりスタックがあふれる",
+"確保したメモリを解放し忘れて使用量が増え続ける",
+"例外処理が漏れてスタックトレースが表示される"],
+a:0,e:"Time of Check to Time of Useの略。残高チェックと引落しの間に並行リクエストを差し込まれ二重引出しされる例が典型。排他制御やトランザクションでの一貫性確保が対策。",s:"決済サービス問題(R4春問3など)で問われる論点"},
+{id:"code05",theme:"code",q:"エラーメッセージの取扱いとして適切なものはどれか。",
+c:["利用者には汎用的なメッセージのみ表示し、スタックトレース等の詳細はサーバ側ログに記録する",
+"デバッグを容易にするため、例外の詳細を画面に表示する",
+"エラー発生時はログを残さず処理を継続する",
+"SQLエラーの内容をそのまま利用者に返す"],
+a:0,e:"詳細なエラー情報(SQL文、パス、バージョン等)は攻撃者に内部構造を教えてしまう。画面には汎用メッセージ、詳細は保護されたログへ、が原則。",s:"Web開発問題の定番小問"},
+{id:"code06",theme:"code",q:"ソースコードの静的解析(SAST)の特徴として適切なものはどれか。",
+c:["プログラムを実行せずにコードを解析し、開発の早い段階で脆弱性の候補を検出できる",
+"実行中のアプリケーションに擬似攻撃を行い脆弱性を検出する",
+"誤検知(偽陽性)が発生しない",
+"本番環境でのみ実施できる"],
+a:0,e:"SASTは実行せずに解析するため開発早期(コミット時・CI)に組み込める。一方で偽陽性が多く出る傾向があり、結果の精査が必要。実行しながらの診断はDAST。",s:"シラバス2-6 セキュリティテスト/CI問題(R5秋問3)関連"},
+{id:"code07",theme:"code",q:"ファイルアップロード機能の実装として不適切なものはどれか。",
+c:["アップロードされたファイルを公開ディレクトリに元のファイル名のまま保存し、直接URLでアクセスさせる",
+"拡張子とContent-Typeに加えファイル内容の形式を検証する",
+"保存時にサーバ側で生成したランダムなファイル名を付与する",
+"保存先を公開ディレクトリ外とし、プログラム経由で配信する"],
+a:0,e:"元のファイル名のまま公開ディレクトリに置くと、.phpなどのスクリプトを置かれて実行される(Webシェル設置)おそれがある。保存先の分離・ファイル名の付替え・内容検証が定石。",s:"Webアプリ開発問題で繰り返し出題"},
+{id:"code08",theme:"code",q:"CORSの設定として最も危険なものはどれか。",
+c:["Access-Control-Allow-Originにリクエスト中のOrigin値をそのまま返し、かつ資格情報付きリクエストを許可する",
+"Access-Control-Allow-Originを自社の特定ドメインに限定する",
+"プリフライトリクエストに応答する",
+"許可するHTTPメソッドをGETとPOSTに限定する"],
+a:0,e:"Originをオウム返しにして credentials も許可すると、任意のサイトから認証付きでAPIを呼ばれ、応答内容を読み取られる。許可するオリジンは明示的な許可リストで管理する。",s:"APIセキュリティ(R6春問1)関連論点"},
+{id:"code09",theme:"code",q:"XMLの外部実体参照(XXE)攻撃への対策として適切なものはどれか。",
+c:["XMLパーサの設定で外部実体参照(DTD処理)を無効化する",
+"XML宣言のencodingをUTF-8に固定する",
+"XMLをgzip圧縮して受信する",
+"XMLの要素数を制限する"],
+a:0,e:"XXEは外部実体参照を悪用してサーバ内のファイル読出しやSSRFを行う攻撃。パーサで外部実体・DTDの解決を無効にするのが根本対策。",s:"シラバス2-5関連。API・Webサービス問題で登場"},
+{id:"code10",theme:"code",q:"オープンリダイレクトの脆弱性がもたらす主なリスクはどれか。",
+c:["正規サイトのURLを装ってフィッシングサイトへ誘導される",
+"サーバのファイルが改ざんされる",
+"データベースの内容が削除される",
+"通信内容が盗聴される"],
+a:0,e:"リダイレクト先URLをパラメータで受け取る実装で検証がないと、正規ドメインで始まるリンクから悪性サイトへ転送でき、フィッシングの信憑性を高めてしまう。転送先は許可リストで検証する。",s:"ログイン後リダイレクト機能の設問で出題"},
+
+// ================= auth =================
+{id:"auth01",theme:"auth",q:"多要素認証の組合せとして正しいものはどれか。",
+c:["パスワード(知識)とスマートフォンの認証アプリ(所持)",
+"パスワードと秘密の質問",
+"指紋と顔認証",
+"パスワードとPINコード"],
+a:0,e:"多要素認証は知識・所持・生体という異なる要素の組合せが条件。パスワード+秘密の質問は知識×2、指紋+顔は生体×2でいずれも多要素とはいえない。",s:"認証問題の基本。本文条件の読解にも必須"},
+{id:"auth02",theme:"auth",q:"FIDO2/WebAuthnによる認証がフィッシングに強い理由はどれか。",
+c:["認証器が署名対象にオリジン(サイトのドメイン)を含めるため、偽サイトで取得した応答を正規サイトに使い回せない",
+"パスワードを毎回変更するため",
+"通信を必ずVPN経由にするため",
+"生体情報をサーバに登録して照合するため"],
+a:0,e:"WebAuthnでは公開鍵暗号のチャレンジレスポンスに接続先オリジンが束縛されるため、偽サイトで認証しても正規サイトでは検証に失敗する。生体情報は端末内で照合されサーバへは送られない。",s:"認証システムの開発(R3春問1)ほかで出題"},
+{id:"auth03",theme:"auth",q:"OAuth 2.0の認可コードフローで、認可コード横取り攻撃への対策として用いられるものはどれか。",
+c:["PKCE(code_verifier/code_challenge)",
+"ステートレスなアクセストークン",
+"リフレッシュトークンの長期化",
+"インプリシットフローへの変更"],
+a:0,e:"PKCEはクライアントが生成した検証値をトークン要求時に照合させ、認可コードを横取りしてもトークンを取得できなくする仕組み。スマホアプリ等のパブリッククライアントで必須とされる。",s:"スマホアプリ開発(R7春問3)・API問題の重要論点"},
+{id:"auth04",theme:"auth",q:"OAuth 2.0のstateパラメータの目的はどれか。",
+c:["認可要求と応答を紐付けて検証し、CSRFによる不正な認可応答の受入れを防ぐ",
+"アクセストークンの有効期限を指定する",
+"ユーザーの権限スコープを指定する",
+"リダイレクトURIを暗号化する"],
+a:0,e:"stateは推測困難な値をセッションと紐付けて往復させ、攻撃者が用意した認可応答を被害者のセッションに注入するCSRF攻撃を防ぐ。スコープ指定はscopeパラメータの役割。",s:"OAuth/OIDCの設問で頻出"},
+{id:"auth05",theme:"auth",q:"OpenID Connect(OIDC)がOAuth 2.0に追加した主要な要素はどれか。",
+c:["利用者の認証結果を表すIDトークン(署名付きJWT)",
+"アクセストークン",
+"リフレッシュトークン",
+"クライアントシークレット"],
+a:0,e:"OAuth 2.0は本来「認可」の仕組みで、OIDCは認証層としてIDトークンを追加した。IDトークンは発行者・対象者(aud)・有効期限・nonce等の検証が必須。",s:"SaaS連携・シングルサインオン問題で出題"},
+{id:"auth06",theme:"auth",q:"SAML認証連携でIdPとSPの間でやり取りされるものはどれか。",
+c:["利用者の認証結果や属性を含むデジタル署名付きのアサーション",
+"利用者のパスワードそのもの",
+"SPの秘密鍵",
+"IdPのアクセスログ"],
+a:0,e:"SAMLではIdP(認証提供者)が発行する署名付きアサーションをSP(サービス)が検証して認証を成立させる。パスワードがSPに渡らないことがSSOの利点。",s:"クラウドサービス・テレワーク問題で出題"},
+{id:"auth07",theme:"auth",q:"パスワードリスト攻撃への対策として最も効果的なものはどれか。",
+c:["多要素認証の導入",
+"パスワードの定期変更の強制",
+"パスワード入力欄の伏せ字表示",
+"アカウント名の複雑化"],
+a:0,e:"パスワードリスト攻撃は他サイトから流出した正しいID・パスワードの組を使うため、ロックや複雑化では防ぎにくい。追加の認証要素を要求する多要素認証が最有効。定期変更強制は現在は非推奨。",s:"不正ログイン事例(インシデント問題)で頻出"},
+{id:"auth08",theme:"auth",q:"リスクベース認証の説明として適切なものはどれか。",
+c:["接続元IPアドレスや端末、時間帯などから普段と異なるアクセスを検知した場合に追加認証を要求する",
+"パスワードの強度をリスク値として数値化する",
+"全てのログインで生体認証を必須にする",
+"リスクの高い利用者のアカウントを削除する"],
+a:0,e:"利用状況の文脈からリスクを判定し、疑わしい場合のみ追加認証を課すことで、利便性と安全性を両立させる方式。不正ログイン対策問題の選択肢・記述で登場する。",s:"スマホ決済(R2問1)系の問題で出題"},
+{id:"auth09",theme:"auth",q:"JWT(JSON Web Token)の検証で必須の確認事項として不適切なものはどれか。",
+c:["ヘッダのalgがnoneの場合は署名検証を省略して受け入れる",
+"署名が正しい鍵で検証できること",
+"有効期限(exp)が切れていないこと",
+"発行者(iss)と対象者(aud)が想定どおりであること"],
+a:0,e:"alg:noneを受け入れると署名なしトークンの偽造が可能になる既知の攻撃がある。検証側で許可するアルゴリズムを固定し、署名・exp・iss・audを必ず検証する。",s:"APIセキュリティ(R6春問1)関連"},
+{id:"auth10",theme:"auth",q:"特権ID(管理者アカウント)の管理として適切なものはどれか。",
+c:["利用を申請制とし、操作ログを取得して定期的にレビューする",
+"運用チーム全員で同一の管理者パスワードを共有する",
+"緊急対応に備え常時ログインした端末を用意しておく",
+"パスワードを設定ファイルに平文で記載して自動化に使う"],
+a:0,e:"特権IDは最小権限・申請ベースの一時利用・操作ログの記録とレビューが原則。共有パスワードは責任追跡性を失わせる。シラバス3-8(アカウント管理・アクセス管理)の中心論点。",s:"内部不正・運用問題で出題"},
+];
+QUESTIONS.push(
+// ================= incident =================
+{id:"inc01",theme:"incident",q:"マルウェア感染が疑われるPCを発見した際の初動対応として最も適切なものはどれか。",
+c:["ネットワークから隔離し、電源は入れたまま保全して調査部門へ連絡する",
+"直ちに電源を切って再起動し、ウイルススキャンを実行する",
+"OSを再インストールして業務を再開する",
+"様子を見ながら業務を継続する"],
+a:0,e:"隔離により被害拡大とC&C通信を止めつつ、メモリ上の証跡(実行中プロセス・通信情報)を保全するため電源は原則切らない。再起動や初期化は揮発性情報や証拠を消失させる。",s:"インシデント対応問題(H30秋・R4春ほか)で定番"},
+{id:"inc02",theme:"incident",q:"プロキシサーバのログ調査で、マルウェアのC&C通信を疑わせる特徴はどれか。",
+c:["業務と無関係の外部ホストへ、深夜も含め一定間隔で繰り返されるHTTP(S)アクセス",
+"始業直後に集中する社内ポータルへのアクセス",
+"昼休みの動画サイト閲覧",
+"月末に増えるファイルサーバへのアクセス"],
+a:0,e:"C&C通信はビーコンと呼ばれる定期的な通信が特徴で、時間帯を問わず一定間隔・同一宛先という規則性が手掛かりになる。ログの時系列分析はSC午後の中心スキル。",s:"標的型攻撃対応(R1秋問3)などログ分析問題で頻出"},
+{id:"inc03",theme:"incident",q:"デジタルフォレンジックにおける証拠保全の原則として適切なものはどれか。",
+c:["原本のディスクは書込み防止した上で複製を作成し、調査は複製に対して行う",
+"原本のディスクを直接操作して素早く調査する",
+"不要と思われるログは調査前に削除して整理する",
+"保全作業の記録は調査終了後にまとめて作成する"],
+a:0,e:"証拠の完全性維持のため、書込み防止装置を介してビット単位の複製(ハッシュ値で同一性を確認)を取得し、解析は複製で行う。作業記録(Chain of Custody)は都度残す。",s:"シラバス4-4 証拠の収集及び分析"},
+{id:"inc04",theme:"incident",q:"ランサムウェア被害からの復旧を確実にするバックアップ方式として最も適切なものはどれか。",
+c:["ネットワークから切り離したオフライン媒体や書換え不能な領域にもバックアップを保管する",
+"感染したサーバと同じネットワーク上のNASに毎日バックアップする",
+"バックアップは月1回、同一サーバ内の別フォルダに取得する",
+"バックアップの復元テストは行わず取得のみ続ける"],
+a:0,e:"最近のランサムウェアはネットワーク上のバックアップも暗号化・削除するため、オフライン保管やイミュータブルストレージが有効。3-2-1ルールと復元テストの実施も重要。",s:"ランサムウェア対策(H29秋問1ほか)関連"},
+{id:"inc05",theme:"incident",q:"CSIRTにおけるトリアージの説明として適切なものはどれか。",
+c:["検知した事象の影響度・緊急度を評価し、対応の要否と優先順位を決定する",
+"インシデントの根本原因を特定する",
+"再発防止策を経営層へ報告する",
+"マルウェアの検体を解析する"],
+a:0,e:"トリアージは受け付けた事象をインシデントとするかの判断と優先順位付けを行う工程。限られた要員で重大事案から対応するために不可欠。シラバス4-2に対応。",s:"インシデント対応体制の整備(R3春PM2問1)で出題"},
+{id:"inc06",theme:"incident",q:"EDRの主な機能として適切なものはどれか。",
+c:["端末上のプロセス起動や通信などの挙動を記録・監視し、侵害の検知と調査・対処を支援する",
+"既知マルウェアのパターンマッチングによる侵入前のブロックのみを行う",
+"ネットワーク境界で不正パケットを遮断する",
+"メールの添付ファイルを無害化する"],
+a:0,e:"EDR(Endpoint Detection and Response)は侵入を前提に端末の挙動を常時記録し、検知後の影響範囲調査(どのプロセスが何をしたか)や遠隔隔離を可能にする。パターンマッチング中心の従来型AVと対比される。",s:"R4以降のインシデント問題で登場"},
+{id:"inc07",theme:"incident",q:"インシデント調査で複数機器のログを突き合わせる前提として重要なものはどれか。",
+c:["NTPによる機器間の時刻同期",
+"ログの圧縮形式の統一",
+"ログの言語設定の統一",
+"ログファイル名の命名規則"],
+a:0,e:"時刻がずれていると攻撃の前後関係を正しく再構成できない。NTPでの時刻同期とタイムゾーンの整合はログ管理の基本。シラバス3-4に明記されている。",s:"ログ分析問題の定番小問"},
+{id:"inc08",theme:"incident",q:"個人データの漏えいが発生した場合の対応として、個人情報保護法上求められるものはどれか。",
+c:["個人情報保護委員会への報告と本人への通知(一定の重大事案の場合)",
+"警察への被害届の提出のみ",
+"社内での記録保管のみで外部報告は不要",
+"報道機関への発表のみ"],
+a:0,e:"要配慮個人情報の漏えいや1,000人超の漏えい等の重大事案では、個人情報保護委員会への報告(速報・確報)と本人通知が義務。インシデント対応手順の設問で問われる。",s:"クレジットカード情報の漏えい(R6秋問3)関連"},
+{id:"inc09",theme:"incident",q:"攻撃の痕跡調査で用いるIoC(Indicator of Compromise)に該当しないものはどれか。",
+c:["自社の情報セキュリティ基本方針",
+"マルウェアのファイルハッシュ値",
+"C&CサーバのIPアドレスやドメイン名",
+"攻撃で使われるファイル名やレジストリキー"],
+a:0,e:"IoCは侵害の存在を示す技術的指標(ハッシュ値、通信先、ファイルパス等)。脅威情報として共有され、ログ検索やEDRでの横断調査に使う。基本方針は指標ではない。",s:"脅威情報調査(R4秋PM2問1)で出題"},
+{id:"inc10",theme:"incident",q:"インシデント対応完了後に行う活動として最も適切なものはどれか。",
+c:["対応の振り返りを行い、根本原因に基づく再発防止策と手順の改善を実施する",
+"記録を全て削除し通常業務に戻る",
+"関係者の処分を最優先で決定する",
+"同じ攻撃は再来しないため特段の対応はしない"],
+a:0,e:"事後活動(Lessons Learned)では時系列の整理、根本原因分析、再発防止策、手順・教育への反映を行う。シラバス4-3の「対応改善」に対応し、記述式で問われやすい。",s:"インシデントレスポンス(R6秋問1)関連"},
+
+// ================= cloud =================
+{id:"cl01",theme:"cloud",q:"IaaSにおける責任共有モデルで、利用者側の責任となるものはどれか。",
+c:["ゲストOSのパッチ適用とミドルウェア・アプリケーションの設定",
+"データセンターの物理的セキュリティ",
+"ハイパーバイザの脆弱性対策",
+"ホストサーバのハードウェア保守"],
+a:0,e:"IaaSでは物理層と仮想化基盤はクラウド事業者、ゲストOSから上(OS設定・パッチ・アプリ・データ・アクセス管理)は利用者の責任。SaaS/PaaSでは境界が変わる点も整理しておく。",s:"クラウドセキュリティ問題(R3春PM2問2ほか)で頻出"},
+{id:"cl02",theme:"cloud",q:"クラウドのオブジェクトストレージからの情報漏えいで最も多い原因はどれか。",
+c:["アクセス権設定の誤りによる意図しない公開",
+"ストレージ暗号化アルゴリズムの解読",
+"データセンターへの物理侵入",
+"ハイパーバイザの脆弱性悪用"],
+a:0,e:"バケットの公開設定ミスやアクセスポリシーの誤りが漏えいの典型原因。設定の定期点検やCSPM(設定監査ツール)の活用、公開ブロック機能の有効化が対策。",s:"クラウドサービス利用(R5春問3)関連"},
+{id:"cl03",theme:"cloud",q:"CI/CDパイプラインのセキュリティ対策として適切なものはどれか。",
+c:["リポジトリにシークレットを直接置かず、シークレット管理機能から実行時に注入する",
+"ビルドを速くするため全ての検査を省略する",
+"APIキーをソースコードにコミットして共有する",
+"本番デプロイ権限を全開発者に付与する"],
+a:0,e:"リポジトリへの認証情報の混入は漏えい事故の典型。シークレットは専用の管理機構で保護し、コミット時の検出(シークレットスキャン)も併用する。CI設定ファイルの改ざんや依存パッケージ汚染も論点。",s:"継続的インテグレーション(R5秋問3)で出題"},
+{id:"cl04",theme:"cloud",q:"クラウドの一時的な認証情報(インスタンスに付与するロール)を使う利点はどれか。",
+c:["長期の固定アクセスキーを配布せずに済み、漏えい時の影響を時間・権限の面で限定できる",
+"通信速度が向上する",
+"利用料金が安くなる",
+"多要素認証が不要になる"],
+a:0,e:"実行環境にロールを割り当てて短期の認証情報を自動発行させれば、固定キーの埋込み・漏えいリスクを減らせる。SSRFによるメタデータ窃取への対策(IMDSv2等)とセットで問われる。",s:"クラウド移行問題(R4春PM2問2)関連"},
+{id:"cl05",theme:"cloud",q:"SaaS利用時のセキュリティ対策として適切なものはどれか。",
+c:["SSO・多要素認証を構成し、退職者アカウントを速やかに無効化する運用を整備する",
+"利用者各自が自由にアカウントを作成して管理する",
+"パスワードをSaaS間で共通にして管理を簡素化する",
+"アクセスログの確認はSaaS事業者に全て任せる"],
+a:0,e:"SaaSはID管理が守りの中心。IdP連携によるSSO+MFA、入退社に連動したプロビジョニング、監査ログの自社での確認が基本。シャドーITの把握も論点になる。",s:"コンサル業務で利用するSaaS(R7秋問1)関連"},
+{id:"cl06",theme:"cloud",q:"コンテナイメージのセキュリティ対策として適切なものはどれか。",
+c:["信頼できるレジストリのベースイメージを使い、脆弱性スキャンを行ってから利用する",
+"タグlatestを常に本番で使い続ける",
+"イメージにデータベースのパスワードを含めて配布する",
+"rootユーザーでの実行を標準とする"],
+a:0,e:"出所不明のイメージや古いベースイメージは既知脆弱性やマルウェア混入のリスクがある。スキャンの組込み、非root実行、シークレットの外出しが定石。",s:"CI/CD問題(R5秋問3)関連"},
+{id:"cl07",theme:"cloud",q:"クラウドサービスの監査ログ(操作ログ)を有効化する主な目的はどれか。",
+c:["誰がいつどの設定変更やデータ操作を行ったかを追跡し、不正や誤操作を検知・調査できるようにする",
+"ストレージ使用量を削減する",
+"通信を暗号化する",
+"バックアップを自動化する"],
+a:0,e:"管理コンソールやAPIの操作ログは責任追跡性の要で、不審な設定変更の検知やインシデント調査に必須。改ざん防止のため別アカウント・別領域への保管も論点。",s:"クラウドセキュリティ(R3春PM2問2)で出題"},
+{id:"cl08",theme:"cloud",q:"テレワーク環境で従来型VPN集約の課題を補うために提唱される考え方はどれか。",
+c:["接続元を信頼せず、アクセスごとに利用者・端末を検証するゼロトラストの考え方",
+"社内ネットワークは常に安全とみなす境界防御の徹底",
+"全通信を平文にして監視を容易にする",
+"私物端末の無条件利用の許可"],
+a:0,e:"ゼロトラストは「境界の内側=安全」を前提とせず、毎回のアクセスで認証・認可・端末の健全性を検証する。VPN機器の脆弱性悪用による侵入事例の増加も背景として問われる。",s:"テレワーク環境(R2 PM2問2)関連"},
+{id:"cl09",theme:"cloud",q:"依存ライブラリ経由の攻撃(サプライチェーン攻撃)への開発側の対策として適切なものはどれか。",
+c:["利用パッケージとバージョンを把握(SBOM)し、既知脆弱性や改ざんの有無を継続的に確認する",
+"パッケージは常に自動で最新版へ無条件更新する",
+"外部ライブラリの利用を記録しない",
+"署名検証を無効化してビルドを高速化する"],
+a:0,e:"依存関係の把握(SBOM)、ロックファイルによるバージョン固定、脆弱性データベースとの突合、改ざん検知が基本。taposquatting等の攻撃手口も知識として問われる。",s:"サプライチェーンのリスク対策(R7春問1)関連"},
+{id:"cl10",theme:"cloud",q:"クラウド利用規程で定めるべき事項として最も適切なものはどれか。",
+c:["利用申請・承認の手続と、取り扱ってよい情報の区分(データ分類に応じた利用可否)",
+"クラウド事業者のデータセンター住所の暗記",
+"全社員のパスワードの一覧管理",
+"クラウド利用の全面禁止"],
+a:0,e:"新しいSaaS等の利用を申請・審査する手続と、機密区分ごとの保存可否・設定基準を定めることで、シャドーITと設定ミスのリスクを組織的に管理できる。",s:"シラバス1-4/3-10関連"},
+
+// ================= malware =================
+{id:"mal01",theme:"malware",q:"標的型攻撃メールの特徴として適切なものはどれか。",
+c:["業務に関係がありそうな件名・差出人を装い、特定の組織や個人に送られる",
+"不特定多数に同一の文面で大量送信される",
+"必ず実行形式ファイルが添付されている",
+"送信元が必ず海外のIPアドレスである"],
+a:0,e:"標的型攻撃は対象組織を調査した上で、取引先や業務連絡を装った巧妙なメールを送る。添付はマクロ付き文書やリンクなど多様で、少数のみに送られるため検知が難しい。",s:"標的型攻撃への対応(R1秋問3)ほか"},
+{id:"mal02",theme:"malware",q:"Emotetの感染拡大で悪用された特徴的な手口はどれか。",
+c:["窃取した実際のメール文面への返信を装い、正規のやり取りに紛れて添付ファイルを開かせる",
+"OSの脆弱性のみを利用しメールを使わない",
+"物理的なUSBメモリの配布のみで感染する",
+"Webサイトの閲覧だけで必ず感染する"],
+a:0,e:"Emotetは感染端末からメールと連絡先を窃取し、実在のやり取りへの返信を装った攻撃メールを送るため受信者が信用しやすい。マクロ実行の無効化や訓練が対策として問われた。",s:"マルウェア感染対処(R3秋PM2問2)関連"},
+{id:"mal03",theme:"malware",q:"ファイルレスマルウェアの説明として適切なものはどれか。",
+c:["実行ファイルをディスクに残さず、PowerShell等の正規ツールを悪用してメモリ上で活動する",
+"ファイルサーバのみに感染するマルウェアである",
+"ファイルを暗号化しないランサムウェアである",
+"必ずUSBメモリ経由で感染する"],
+a:0,e:"正規のOS標準ツール(Living off the Land)をメモリ上で悪用するためパターンマッチング型の検知が困難。挙動監視(EDR)やスクリプト実行の制御・ログ取得が対策となる。",s:"シラバス3-2 マルウェアの種類と特徴"},
+{id:"mal04",theme:"malware",q:"サンドボックスによるマルウェア検知の限界として適切なものはどれか。",
+c:["仮想環境の検知や時間差起動などで解析を回避するマルウェアが存在する",
+"既知のマルウェアを一切検知できない",
+"通信を伴うマルウェアは解析できない",
+"添付ファイルの解析には使用できない"],
+a:0,e:"高度なマルウェアは実行環境が解析用サンドボックスだと判断すると挙動を変えたり、一定時間後に活動を開始したりして検知を回避する。多層防御の一要素として位置づける。",s:"シラバス3-2/4-3(解析回避)"},
+{id:"mal05",theme:"malware",q:"二重恐喝(ダブルエクストーション)型ランサムウェア攻撃の説明として適切なものはどれか。",
+c:["データを暗号化した上で、窃取したデータの公開もちらつかせて身代金を要求する",
+"2種類の暗号方式でファイルを二重に暗号化する",
+"2つの組織を同時に攻撃する",
+"身代金を2回に分けて要求する"],
+a:0,e:"暗号化前にデータを窃取し「支払わなければ公開する」と脅す手口。バックアップで復旧できても漏えいリスクが残るため、侵入防止・早期検知・漏えい時対応まで含めた対策が必要。",s:"近年のインシデント問題の背景知識"},
+{id:"mal06",theme:"malware",q:"マルウェアの横展開(ラテラルムーブメント)を抑止する対策として適切なものはどれか。",
+c:["ネットワークのセグメント分割と、端末間・サーバ間で不要な通信の遮断",
+"全端末を同一のフラットなネットワークに収容する",
+"全サーバで同一のローカル管理者パスワードを使用する",
+"ファイル共有を全社員に無制限で開放する"],
+a:0,e:"侵入後の内部移動は管理共有やRDP、共通パスワードの悪用が典型。セグメント化・通信制御・特権資格情報の分離(共通ローカルAdminの排除)が抑止策となる。",s:"LAN分離(H30春問3)・内部対策問題関連"},
+{id:"mal07",theme:"malware",q:"マルウェア対策としてのアプリケーション許可リスト方式の説明はどれか。",
+c:["実行を許可したプログラムのみ動作させ、それ以外の実行を禁止する",
+"危険と判定したプログラムのみを禁止する",
+"全てのプログラムの実行を禁止する",
+"利用者の判断で実行可否を毎回選択させる"],
+a:0,e:"許可リスト(ホワイトリスト)方式は未知のマルウェアにも有効だが、リストの維持管理コストが課題。禁止リスト方式(ブラックリスト)との違いを問う形で出題される。",s:"PCのマルウェア対策(R3秋問3)関連"},
+{id:"mal08",theme:"malware",q:"C&C通信の遮断策として有効性が高いものはどれか。",
+c:["プロキシ経由の通信のみ許可し、プロキシで認証とURLフィルタリングを行う",
+"社内から外部への通信を全て自由に許可する",
+"DNSの名前解決を全て社外のリゾルバに任せる",
+"全端末にグローバルIPアドレスを付与する"],
+a:0,e:"外向き通信をプロキシに集約し認証を課すと、プロキシ非対応・認証情報を持たないマルウェアの通信を遮断でき、ログも一元化できる。直接接続の禁止(FWで遮断)とセットで問われる。",s:"内部対策・出口対策の定番論点"},
+{id:"mal09",theme:"malware",q:"マクロ付き文書ファイルによる感染への対策として適切なものはどれか。",
+c:["インターネット由来のファイルのマクロを既定で無効化し、業務上必要な場合のみ限定的に許可する",
+"全社員にマクロの有効化ボタンを押すよう周知する",
+"文書ファイルの受信を全面的に禁止する",
+"拡張子を偽装して保存する"],
+a:0,e:"マクロは標的型メールの典型的な感染経路。既定無効化・署名付きマクロのみ許可・保護ビューの活用が現実的な対策で、利用部門との調整も記述問題で問われる。",s:"標的型攻撃・Emotet対策問題"},
+{id:"mal10",theme:"malware",q:"感染端末の調査でまず確認すべき情報として適切な組合せはどれか。",
+c:["実行中プロセス、外部との通信先、自動起動設定(永続化)の有無",
+"壁紙の設定、画面解像度、キーボード配列",
+"プリンタドライバの版数のみ",
+"ディスクの空き容量のみ"],
+a:0,e:"プロセス・通信・永続化(自動起動、スケジュールタスク、レジストリ等)はマルウェアの活動と再起動後の残存を判断する基本3点。EDRやフォレンジックツールで収集する。",s:"インシデント調査問題の定番"},
+);
+QUESTIONS.push(
+// ================= network =================
+{id:"net01",theme:"network",q:"DMZに公開Webサーバを設置する目的として適切なものはどれか。",
+c:["公開サーバが侵害されても内部ネットワークへ直接到達させないよう、ネットワークを分離する",
+"Webサーバの応答速度を向上させる",
+"サーバのIPアドレスを利用者から隠蔽する",
+"TLS証明書を不要にする"],
+a:0,e:"DMZは外部公開系と内部系を分離する緩衝地帯。FWでDMZ→内部の通信を必要最小限に絞ることで、公開サーバ侵害時の被害拡大を防ぐ。FWルールの穴埋め問題として頻出。",s:"ネットワーク構成図の読解は午後の基本"},
+{id:"net02",theme:"network",q:"ファイアウォールのルール設計の原則として適切なものはどれか。",
+c:["全て拒否を既定とし、業務上必要な通信のみを明示的に許可する",
+"全て許可を既定とし、危険な通信のみを拒否する",
+"ルールは一度設定したら見直さない",
+"送信元IPアドレスのみで判断し、ポート番号は考慮しない"],
+a:0,e:"デフォルト拒否(ホワイトリスト)が原則。不要になったルールの棚卸しも運用上の論点。設問では「この通信を通すために必要なルール」を表形式で答えさせる形式が定番。",s:"LAN分離(H30春問3)ほか多数"},
+{id:"net03",theme:"network",q:"IDSとIPSの違いとして適切なものはどれか。",
+c:["IDSは不正通信の検知・通知を行い、IPSは通信経路上で検知した通信の遮断まで行う",
+"IDSは暗号化通信を復号できるが、IPSはできない",
+"IDSはハードウェア、IPSはソフトウェアで実装される",
+"IDSは内部ネットワーク専用、IPSはDMZ専用である"],
+a:0,e:"IDSは監視・警告(ミラーポート等で受動的に監視)、IPSはインライン設置で遮断まで行う。誤検知時にIPSは正常業務を止めるリスクがある点も比較論点になる。",s:"シラバス3-5 ネットワークセキュリティ技術"},
+{id:"net04",theme:"network",q:"無線LANのセキュリティ対策として最も適切なものはどれか。",
+c:["WPA3(または WPA2)エンタープライズモードでIEEE 802.1X認証を行う",
+"WEPで暗号化する",
+"SSIDを推測しやすい社名にする",
+"MACアドレスフィルタリングのみで保護する"],
+a:0,e:"エンタープライズモードは利用者ごとの認証(EAP)と鍵管理を実現する。WEPは解読可能で使用禁止レベル、MACアドレスは偽装可能なため単独では不十分。",s:"オフィスネットワーク問題で出題"},
+{id:"net05",theme:"network",q:"VPN装置の脆弱性を悪用した侵入への対策として適切なものはどれか。",
+c:["脆弱性情報を継続的に収集し、修正パッチを迅速に適用するとともに多要素認証を導入する",
+"VPN装置は外部公開機器ではないためパッチ適用は不要である",
+"VPNのログは容量節約のため取得しない",
+"退職者のVPNアカウントは無効化せず残しておく"],
+a:0,e:"インターネットに露出するVPN装置は近年の侵入経路の筆頭で、既知脆弱性の放置と認証情報の使い回しが狙われる。資産把握・迅速なパッチ・MFA・ログ監視が必須。",s:"テレワーク・侵入事例問題(R2以降)関連"},
+{id:"net06",theme:"network",q:"ネットワーク機器のリモート管理として適切な方法はどれか。",
+c:["管理用セグメントからのみSSH等の暗号化プロトコルで接続を許可する",
+"どこからでもTelnetで接続できるようにする",
+"管理画面をインターネットに直接公開する",
+"初期パスワードのまま運用する"],
+a:0,e:"管理インタフェースはアクセス元の限定(管理セグメント・踏み台経由)と暗号化・強い認証が原則。管理画面の公開と初期設定のままの運用は侵害事例の典型原因。",s:"ネットワークのセキュリティ対策(R3春問2)関連"},
+{id:"net07",theme:"network",q:"リバースプロキシをWeb公開構成に導入するセキュリティ上の利点はどれか。",
+c:["Webサーバを直接公開せず、TLS終端やWAF機能、アクセス制御を集約できる",
+"Webサーバの台数を必ず削減できる",
+"通信を平文化して監視を不要にできる",
+"DNSサーバが不要になる"],
+a:0,e:"リバースプロキシは外部からのアクセスを集約して背後のサーバを隠蔽し、TLS終端・認証・WAF・ログ取得を一元化できる。構成図の穴埋めや通信経路の設問で登場する。",s:"Webサイト統合(R2 PM2問1)関連"},
+{id:"net08",theme:"network",q:"内部ネットワークで取得すべきログとして、侵入の横展開調査に最も有用なものはどれか。",
+c:["認証サーバ(Active Directory等)の認証成功・失敗ログ",
+"プリンタの用紙切れログ",
+"会議室予約システムの利用ログ",
+"空調設備の温度ログ"],
+a:0,e:"横展開では窃取したアカウントでの認証が発生するため、ドメインコントローラの認証ログ(どのアカウントがどの端末からいつ認証したか)が追跡の要になる。",s:"インシデント調査問題でのログ選択設問"},
+{id:"net09",theme:"network",q:"ARPスプーフィング攻撃で攻撃者ができることはどれか。",
+c:["同一セグメント内で通信を自分の端末経由に誘導し、盗聴や改ざんを行う",
+"インターネット越しに任意のサーバを停止させる",
+"DNSのゾーン転送を強制する",
+"無線LANのパスフレーズを解読する"],
+a:0,e:"偽のARP応答でIPアドレスとMACアドレスの対応を書き換え、中間者として通信を経由させる。同一セグメント内で成立する攻撃で、検知や動的ARP検査が対策。",s:"シラバス3-5 ネットワークプロトコルの知識"},
+{id:"net10",theme:"network",q:"ゾーニングされたネットワークで、内部サーバセグメントから直接インターネットへの通信を禁止する主な狙いはどれか。",
+c:["サーバが侵害された場合の外部への情報持出しやC&C通信を困難にする",
+"サーバの処理負荷を上げる",
+"内部利用者の業務効率を下げる",
+"IPアドレスの節約"],
+a:0,e:"出口対策の一つ。サーバからの外向き通信を原則遮断(必要なものはプロキシ・中継サーバ経由に限定)すれば、侵害後のデータ持出しを検知・阻止しやすくなる。FWルール設問の頻出根拠。",s:"内部対策・出口対策問題(R1秋問3ほか)"},
+
+// ================= mail =================
+{id:"mail01",theme:"mail",q:"SPFの仕組みとして適切なものはどれか。",
+c:["送信ドメインのDNSに正当な送信元IPアドレスを公開し、受信側がエンベロープFROMのドメインと照合して検証する",
+"メール本文にデジタル署名を付与して改ざんを検知する",
+"メールを暗号化して盗聴を防ぐ",
+"添付ファイルをウイルススキャンする"],
+a:0,e:"SPFはDNSのTXTレコードで正当な送信サーバを宣言し、受信側が送信元IPを照合する送信ドメイン認証。転送で検証に失敗しやすい弱点があり、DKIMとの併用が推奨される。",s:"電子メールのセキュリティ対策(R1秋問1・R2問2)で出題"},
+{id:"mail02",theme:"mail",q:"DKIMがSPFに比べて優れている点はどれか。",
+c:["メールヘッダ・本文への署名で検証するため、メール転送を経ても検証が維持されやすい",
+"DNSへの設定が一切不要である",
+"受信側の対応が不要である",
+"本文が自動的に暗号化される"],
+a:0,e:"DKIMは秘密鍵で署名し公開鍵をDNSで公開する方式。経路のIPアドレスに依存しないため転送に強い。SPF・DKIM・DMARCの三点セットの特徴比較は頻出。",s:"メールセキュリティ問題の定番比較"},
+{id:"mail03",theme:"mail",q:"DMARCの機能として適切なものはどれか。",
+c:["SPF/DKIMの検証結果とヘッダFromの整合を確認し、失敗時の取扱い(none/quarantine/reject)をドメイン側が宣言できる",
+"メール本文を自動翻訳する",
+"添付ファイルを自動で暗号化する",
+"メールの送信数を制限する"],
+a:0,e:"DMARCはなりすまし対策の要で、認証失敗時のポリシー宣言とレポート受信ができる。ヘッダFrom(表示上の差出人)との整合(アライメント)を検証する点がポイント。",s:"なりすましメール対策設問で頻出"},
+{id:"mail04",theme:"mail",q:"ビジネスメール詐欺(BEC)への対策として最も適切なものはどれか。",
+c:["振込先変更などの重要依頼はメール以外の手段(電話等)で相手に事実確認する運用を定める",
+"メールの署名欄を装飾する",
+"添付ファイルを常にZIP圧縮する",
+"メールの件名に社外秘と記載する"],
+a:0,e:"BECは経営者や取引先になりすまして送金を指示する詐欺で、技術対策だけでは防ぎきれない。別経路での事実確認、複数人承認などの業務プロセスでの対策が本質。",s:"メール・インシデント複合問題で出題"},
+{id:"mail05",theme:"mail",q:"DNSキャッシュポイズニング攻撃への対策として適切なものはどれか。",
+c:["DNSSECの導入や、問合せの送信元ポートのランダム化を行う",
+"DNSサーバの応答を高速化する",
+"TTLを極端に長く設定する",
+"ゾーン転送を全ホストに許可する"],
+a:0,e:"偽の応答をキャッシュさせる攻撃には、応答の真正性を署名で検証するDNSSECや、推測を困難にするポートランダム化が有効。キャッシュサーバと権威サーバの分離も基本対策。",s:"DNS問題(R6秋問2ほか)関連"},
+{id:"mail06",theme:"mail",q:"ドメイン名の廃止・変更時に注意すべきリスクはどれか。",
+c:["手放したドメインを第三者に再取得され、なりすましサイトやメール受信に悪用される(ドロップキャッチ)",
+"DNSサーバの電気代が増加する",
+"ドメイン名が長くなると通信速度が低下する",
+"IPアドレスが自動的に変わる"],
+a:0,e:"廃止ドメインの再取得により、旧ドメイン宛メールの窃取や偽サイト開設が可能になる。R6秋問2はドメイン名変更を主題に、移行手順とリスクを問う新傾向の出題だった。",s:"ドメイン名変更(R6秋問2)"},
+{id:"mail07",theme:"mail",q:"オープンリゾルバを放置した場合のリスクはどれか。",
+c:["DNSリフレクション(増幅)攻撃の踏み台として悪用される",
+"自ドメインのメールが全て暗号化される",
+"Webサイトの表示が高速になる",
+"ゾーン情報が自動でバックアップされる"],
+a:0,e:"誰からの問合せにも応答するキャッシュサーバは、送信元を偽装したDDoS攻撃の増幅装置に悪用される。問合せ元を自組織に限定する設定が対策。",s:"シラバス3-5 DNSのセキュリティ"},
+{id:"mail08",theme:"mail",q:"メール無害化の手法として適切なものはどれか。",
+c:["添付ファイルからマクロ等の動的コンテンツを除去し、本文中のURLリンクを無効化して配送する",
+"メールを全て削除する",
+"件名を暗号化する",
+"送信者へ自動返信する"],
+a:0,e:"無害化(サニタイズ)は添付のマクロ除去・画像化(CDR)、URL無効化などで感染リスクを下げる。利便性低下との両立が記述設問で問われる。",s:"自治体・重要システム系の問題で出題"},
+{id:"mail09",theme:"mail",q:"サブドメインテイクオーバーが発生する典型的な原因はどれか。",
+c:["外部サービス向けのCNAMEレコードを、サービス解約後もDNSに残している",
+"TTLを短く設定している",
+"DNSSECを有効にしている",
+"MXレコードを複数登録している"],
+a:0,e:"解約済みサービスを指すCNAME等が残ると、第三者がそのサービス上で当該名を取得し、正規サブドメインで偽コンテンツを配信できる。DNSレコードの棚卸しが対策。",s:"DNS運用問題(R6秋問2)関連の新傾向"},
+{id:"mail10",theme:"mail",q:"フィッシング対策として送信ドメイン認証と併せて有効なものはどれか。",
+c:["自社を装うフィッシングサイトの監視と、利用者への注意喚起・報告窓口の整備",
+"メールの利用を全面禁止する",
+"パスワードを平文でメール通知する",
+"リンクは全て短縮URLで送る"],
+a:0,e:"技術対策(DMARC等)と併せ、類似ドメインの監視・テイクダウン依頼、利用者教育、通報窓口が総合的なフィッシング対策となる。短縮URLはかえって確認を妨げる。",s:"金融・EC系事例問題で出題"},
+
+// ================= crypto =================
+{id:"cry01",theme:"crypto",q:"ハイブリッド暗号方式でTLSが共通鍵暗号と公開鍵暗号を併用する理由はどれか。",
+c:["鍵交換・認証には公開鍵暗号を使い、大量データの暗号化は高速な共通鍵暗号で行うため",
+"公開鍵暗号の方が常に高速だから",
+"共通鍵暗号は安全性が証明されていないから",
+"法令で併用が義務付けられているから"],
+a:0,e:"公開鍵暗号は鍵配送問題を解決するが処理が重い。セッション確立時に共通鍵(セッション鍵)を安全に共有し、以降は高速な共通鍵暗号で通信するのが定石。",s:"暗号の基本。データ暗号化の設計(H29秋PM2問2)関連"},
+{id:"cry02",theme:"crypto",q:"TLSのサーバ証明書検証でブラウザが確認する事項として不適切なものはどれか。",
+c:["サーバの秘密鍵がブラウザに登録済みであること",
+"信頼するルート認証局までの証明書チェーンが検証できること",
+"証明書の有効期限が切れていないこと",
+"接続先ホスト名が証明書のSAN/CNと一致すること"],
+a:0,e:"サーバの秘密鍵はサーバのみが保持するもので、ブラウザには登録されない。検証はチェーン・有効期限・ホスト名一致・失効確認が基本。証明書エラーの原因分析設問で問われる。",s:"SSL/TLSサーバ設定と運用(H29秋問3)ほか"},
+{id:"cry03",theme:"crypto",q:"前方秘匿性(Forward Secrecy)の説明として適切なものはどれか。",
+c:["サーバの秘密鍵が将来漏えいしても、過去に記録された通信の復号ができない性質",
+"通信を高速化する性質",
+"証明書の有効期限を延長できる性質",
+"パスワードを平文で送っても安全になる性質"],
+a:0,e:"DHE/ECDHEなどの一時鍵による鍵交換では、セッション鍵がサーバの長期秘密鍵から導出されないため、秘密鍵漏えい時も過去の通信は守られる。TLS 1.3ではFS必須。",s:"TLS設定問題の応用論点"},
+{id:"cry04",theme:"crypto",q:"デジタル署名で保証できるものの組合せとして適切なものはどれか。",
+c:["データの完全性と署名者の真正性(否認防止を含む)",
+"データの機密性と可用性",
+"通信の高速性と匿名性",
+"データの圧縮率と互換性"],
+a:0,e:"署名はハッシュ値を秘密鍵で暗号化したもので、改ざん検知(完全性)と署名者の確認(真正性・否認防止)を実現する。機密性は暗号化の役割で署名では得られない。",s:"暗号・署名の基本(頻出穴埋め)"},
+{id:"cry05",theme:"crypto",q:"証明書の失効確認に用いる仕組みはどれか。",
+c:["CRLまたはOCSP",
+"DNSSECとDKIM",
+"HSTSとCSP",
+"NTPとSNMP"],
+a:0,e:"CRL(失効リスト)は一覧を配布、OCSPは個別照会で失効状態を確認する。OCSPステープリングはサーバが応答を添付して照会負荷とプライバシー問題を軽減する方式で、これも問われる。",s:"PKI運用問題で頻出"},
+{id:"cry06",theme:"crypto",q:"暗号技術の選定で参照すべき、日本の推奨暗号のリストはどれか。",
+c:["CRYPTREC暗号リスト",
+"OWASP Top 10",
+"CVSS",
+"ISMSクラウドセキュリティ認証"],
+a:0,e:"CRYPTRECは電子政府推奨暗号の安全性を評価・公表しており、暗号選定の根拠として参照する。危殆化した方式(SHA-1、RC4、3DES等)からの移行判断も論点。",s:"シラバス3-1 暗号の安全性評価"},
+{id:"cry07",theme:"crypto",q:"共通鍵暗号の鍵管理として適切なものはどれか。",
+c:["鍵を暗号化対象データと分離して保管し、アクセス制御と鍵の定期的な更改を行う",
+"鍵を暗号化したデータと同じファイルに保存する",
+"全システムで同一の鍵を永続的に使用する",
+"鍵をソースコードに直接記述する"],
+a:0,e:"鍵とデータの分離保管、アクセス制御、更改(ローテーション)、廃棄までのライフサイクル管理が鍵管理の基本。HSMやKMSの利用も設計問題で問われる。",s:"データ暗号化の設計(H29秋PM2問2)関連"},
+{id:"cry08",theme:"crypto",q:"パスワード付きZIPファイルをメールで送り、直後に同じ経路でパスワードを送る方式(PPAP)の問題点はどれか。",
+c:["同一経路の盗聴で両方入手でき、かつ暗号化ZIPはマルウェア検査をすり抜けやすい",
+"ファイルサイズが大きくなりすぎる",
+"ZIP形式は解凍できない受信者が多い",
+"パスワードが自動的に無効化される"],
+a:0,e:"経路が同じでは盗聴・誤送信への効果が薄く、検査不能な添付はマルウェア配送にも悪用される。代替はクラウドストレージ共有やS/MIME等。ファイル受渡し問題の頻出論点。",s:"協力会社とのファイルの受渡し(R3秋PM2問1)関連"},
+{id:"cry09",theme:"crypto",q:"ハッシュ関数に求められる性質のうち「衝突発見困難性」の説明はどれか。",
+c:["同じハッシュ値になる異なる2つの入力を見つけることが計算量的に困難であること",
+"ハッシュ値から元の入力を復元できないこと",
+"入力が1ビット変わるとハッシュ値が大きく変わること",
+"ハッシュ値の計算が高速であること"],
+a:0,e:"衝突発見困難性は任意の2入力の衝突が見つけにくい性質。原像計算困難性(一方向性)・第二原像計算困難性との区別が問われる。SHA-1は衝突が現実に生成され危殆化した。",s:"暗号知識の穴埋めで出題"},
+{id:"cry10",theme:"crypto",q:"HSTSヘッダの効果として適切なものはどれか。",
+c:["ブラウザに以降のアクセスをHTTPSに限定させ、HTTPへのダウングレードや中間者攻撃のリスクを減らす",
+"サーバのTLS処理を高速化する",
+"証明書の有効期限を自動延長する",
+"Cookieを自動的に削除する"],
+a:0,e:"Strict-Transport-Securityを受け取ったブラウザは期間中HTTP接続を試みずHTTPSへ内部変換する。初回接続の保護にはpreloadリストへの登録がある。TLS運用設問で登場。",s:"Webサイトのセキュリティ問題関連"},
+
+// ================= mgmt =================
+{id:"mg01",theme:"mgmt",q:"CVSSの基本評価基準(Base Metrics)が表すものはどれか。",
+c:["攻撃元区分や必要な特権など、脆弱性そのものの特性に基づく深刻度",
+"自組織のシステム構成を考慮した最終的なリスク値",
+"攻撃コードの流通状況の時間変化のみ",
+"脆弱性を発見した研究者の評価"],
+a:0,e:"基本評価基準は脆弱性固有の深刻度で環境に依存しない。実際の対応優先度は、攻撃状況(現状評価)や自組織での影響(環境評価)、資産の重要度・悪用可能性(KEV等)を加味して判断する、という流れが記述で問われる。",s:"脆弱性管理(R7春問2・問4)で急増中の論点"},
+{id:"mg02",theme:"mgmt",q:"脆弱性対応の優先順位付けとして最も適切な考え方はどれか。",
+c:["CVSS値に加え、悪用の観測状況、対象システムの重要度・公開状況を考慮して決める",
+"CVSS値が高い順に機械的に全て即日対応する",
+"ベンダーからの通知が来たものだけ対応する",
+"年1回まとめて全パッチを適用する"],
+a:0,e:"限られた要員で対応するには、実際に悪用されているか(KEV・PoC流通)、インターネット公開の有無、業務影響を組み合わせたリスクベースの優先順位付けが必要。",s:"IT資産管理及び脆弱性管理(R7春問4)関連"},
+{id:"mg03",theme:"mgmt",q:"SBOM(Software Bill of Materials)を整備する主な目的はどれか。",
+c:["ソフトウェアを構成するコンポーネントを可視化し、脆弱性公表時に影響範囲を迅速に特定する",
+"ソフトウェアの販売価格を管理する",
+"ソースコードの著作権を放棄する",
+"ビルド時間を短縮する"],
+a:0,e:"Log4Shellのような広範な脆弱性では「自社のどこで使われているか」の特定が初動を左右する。SBOMは部品表として依存関係を管理し、影響調査を迅速化する。",s:"サプライチェーン・脆弱性管理問題(R7)の新論点"},
+{id:"mg04",theme:"mgmt",q:"リスクアセスメントにおけるリスクの大きさの一般的な評価方法はどれか。",
+c:["脅威の発生可能性と、発生した場合の影響の大きさの組合せで評価する",
+"導入済み製品の数で評価する",
+"経営者の主観のみで評価する",
+"従業員数に比例させて評価する"],
+a:0,e:"リスクは発生可能性×影響度で評価し、リスクマトリクス等で優先順位付けする。資産の特定→脅威・脆弱性の分析→評価→対応(低減・回避・共有・保有)の流れも頻出。",s:"リスクアセスメント(R5秋問4)で出題"},
+{id:"mg05",theme:"mgmt",q:"リスク対応の選択肢のうち「リスク共有(移転)」に該当するものはどれか。",
+c:["サイバー保険に加入して損害の一部を保険会社に負担させる",
+"該当業務を廃止する",
+"暗号化を導入して漏えいの影響を下げる",
+"リスクを認識した上で何もせず受け入れる"],
+a:0,e:"共有(移転)は保険や外部委託で第三者とリスクを分担すること。業務廃止は回避、対策導入は低減、受容は保有。4区分の対応付けは知識問題の定番。",s:"シラバス1-3 リスク対応の選択肢"},
+{id:"mg06",theme:"mgmt",q:"委託先のセキュリティ管理として適切なものはどれか。",
+c:["契約でセキュリティ要求事項と監査・報告の権利を定め、対応状況を定期的に確認する",
+"契約後は委託先を全面的に信頼し確認しない",
+"委託先の再委託を無条件で認める",
+"インシデント発生時の連絡義務は定めない"],
+a:0,e:"委託契約にはセキュリティ要件・再委託の制限・インシデント時の報告義務・監査権を盛り込み、チェックリストや実地確認で履行状況を確認する。サプライチェーン攻撃の増加で重要度が上昇。",s:"サプライチェーンのリスク対策(R7春問1)関連"},
+{id:"mg07",theme:"mgmt",q:"内部不正の防止策として「職務の分離」が有効な理由はどれか。",
+c:["一人で不正を完結できないよう、申請と承認など相反する権限を別の者に分ける",
+"従業員の業務量を平準化できる",
+"人件費を削減できる",
+"教育の手間を省ける"],
+a:0,e:"承認・実行・確認の権限を分離すると単独犯行が困難になり、相互牽制が働く。最小権限、ログによる監視、定期的な権限見直しと合わせて内部不正対策の柱となる。",s:"シラバス3-9 人的管理/内部不正問題"},
+{id:"mg08",theme:"mgmt",q:"IT資産管理が脆弱性管理の前提となる理由として適切なものはどれか。",
+c:["把握していない機器・ソフトウェアの脆弱性には対応できず、管理外資産が侵入経路になるため",
+"資産台帳があればパッチ適用が不要になるため",
+"資産の減価償却を早められるため",
+"ライセンス費用が無料になるため"],
+a:0,e:"「守るべきものを知る」ことが出発点。台帳と実態の差異(野良サーバ、退役漏れのVPN機器等)が攻撃の入口になる事例が多く、ASM(攻撃対象領域管理)の考え方も問われ始めている。",s:"IT資産管理及び脆弱性管理(R7春問4)"},
+{id:"mg09",theme:"mgmt",q:"セキュリティパッチを直ちに適用できない場合の対応として適切なものはどれか。",
+c:["WAFやアクセス制限などの回避策(緩和策)を講じた上で、計画的に適用時期を定める",
+"脆弱性を放置し何も記録しない",
+"システムの利用者に口頭で注意を促すだけにする",
+"パッチ適用の代わりにバックアップを停止する"],
+a:0,e:"業務影響や検証の必要からパッチを即適用できない場合は、仮想パッチ(WAF)・機能無効化・アクセス制限等の緩和策で時間を稼ぎ、リスクを記録して計画的に解消する。",s:"脆弱性対応(R4秋問2ほか)の記述定番"},
+{id:"mg10",theme:"mgmt",q:"インシデント発生に備えた経営層の関与として適切なものはどれか。",
+c:["対応体制・報告基準・意思決定権限を平時に定め、演習に参加して実効性を確認する",
+"技術的な問題であるため経営層は関与しない",
+"インシデント発生後に初めて体制を検討する",
+"全ての判断を現場担当者に一任する"],
+a:0,e:"事業停止判断・対外公表・監督官庁報告など経営判断が必要な局面が多く、平時の体制整備と訓練が不可欠。サイバーセキュリティ経営ガイドラインの趣旨とも一致する。",s:"インシデント対応体制の整備(R3春PM2問1)関連"},
+);
+
+// ===== 状態管理・永続化 =====
+const STORE_KEY = "sc-drill-v1";
+let DATA = { q:{}, sessions:[], days:[] }; // q: {qid:{a:attempts,c:correct,last:0/1,at:ts}}
+
+// 保存先の自動判定: Claudeアーティファクト環境 → ブラウザのlocalStorage → メモリのみ
+const store = (()=>{
+  if (typeof window !== "undefined" && window.storage && typeof window.storage.get === "function"){
+    return {
+      name: "claude",
+      async get(){ try{ const r = await window.storage.get(STORE_KEY); return r && r.value ? r.value : null; }catch(e){ return null; } },
+      async set(v){ try{ await window.storage.set(STORE_KEY, v); }catch(e){} },
+      async del(){ try{ await store.del(); }catch(e){} }
+    };
+  }
+  try{
+    localStorage.setItem("__sc_test","1"); localStorage.removeItem("__sc_test");
+    return {
+      name: "local",
+      async get(){ return localStorage.getItem(STORE_KEY); },
+      async set(v){ localStorage.setItem(STORE_KEY, v); },
+      async del(){ localStorage.removeItem(STORE_KEY); }
+    };
+  }catch(e){}
+  let mem = null;
+  return { name:"memory",
+    async get(){ return mem; }, async set(v){ mem = v; }, async del(){ mem = null; } };
+})();
+
+async function loadData(){
+  try{
+    const v = await store.get();
+    if(v) DATA = JSON.parse(v);
+  }catch(e){ /* 保存データ破損時は初期状態で開始 */ }
+}
+async function saveData(){
+  try{ await store.set(JSON.stringify(DATA)); }catch(e){}
+}
+function today(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+
+// ===== ユーティリティ =====
+const $ = id => document.getElementById(id);
+const byId = {}; QUESTIONS.forEach(q=>byId[q.id]=q);
+const themeById = {}; THEMES.forEach(t=>themeById[t.id]=t);
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+function qStat(qid){ return DATA.q[qid] || {a:0,c:0,last:null}; }
+function themeStats(tid){
+  const qs = QUESTIONS.filter(q=>q.theme===tid);
+  let attempted=0, correctLast=0, att=0, cor=0;
+  qs.forEach(q=>{ const s=qStat(q.id); if(s.a>0){attempted++; att+=s.a; cor+=s.c; if(s.last===1)correctLast++; } });
+  return { total:qs.length, attempted, acc: att? Math.round(cor/att*100):null, att, cor };
+}
+
+// ===== 画面遷移 =====
+function show(view){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  $(view).classList.add("active");
+  window.scrollTo({top:0});
+}
+function goHome(){ renderHome(); show("view-home"); }
+
+// ===== ホーム描画 =====
+function renderHome(){
+  let att=0, cor=0;
+  Object.values(DATA.q).forEach(s=>{att+=s.a; cor+=s.c;});
+  $("st-total").textContent = att;
+  $("st-acc").textContent = att? Math.round(cor/att*100)+"%" : "—";
+  $("st-days").textContent = DATA.days.length;
+
+  const list = $("theme-list"); list.innerHTML="";
+  THEMES.forEach(t=>{
+    const s = themeStats(t.id);
+    const card = document.createElement("button");
+    card.className="theme-card"; card.type="button";
+    card.setAttribute("aria-label", t.name+" のドリルを開始");
+    const accCls = s.acc===null? "none" : s.acc>=80? "good" : s.acc>=60? "mid" : "bad";
+    card.innerHTML = `
+      <div class="name">${t.name}<span style="color:var(--shu);font-size:.68rem;margin-left:8px">頻出度 ${t.weight}%</span></div>
+      <div class="acc ${accCls}">${s.acc===null? "未着手" : s.acc+"%"}</div>
+      <div class="meta">${t.desc} ｜ 到達 ${s.attempted}/${s.total}問</div>
+      <div class="bar"><div class="fill ${s.acc!==null&&s.acc>=60?"correct":""}" style="width:${s.attempted/s.total*100}%"></div></div>`;
+    card.onclick = ()=>startQuiz("theme", t.id);
+    list.appendChild(card);
+  });
+
+  const h = $("history");
+  if(!DATA.sessions.length){
+    h.innerHTML = `<div class="empty-note">まだ記録がありません。上のボタンから最初のドリルを始めましょう。</div>`;
+  }else{
+    const rows = DATA.sessions.slice(-8).reverse().map(s=>
+      `<tr><td>${s.date}</td><td>${s.label}</td><td class="score">${s.score} / ${s.total}</td></tr>`).join("");
+    h.innerHTML = `<table><tr><th>日付</th><th>モード</th><th>得点</th></tr>${rows}</table>`;
+  }
+}
+
+// ===== 出題ロジック =====
+let quiz = null; // {list, idx, results[], mode, themeId, label}
+
+function pickQuestions(mode, themeId){
+  if(mode==="theme"){
+    const qs = QUESTIONS.filter(q=>q.theme===themeId);
+    // 未解答 → 前回誤答 → 正答率の低い順 に並べ、上位10問をシャッフル
+    const rank = q=>{ const s=qStat(q.id); if(s.a===0) return 0; if(s.last===0) return 1; return 2 + s.c/s.a; };
+    return shuffle(qs.sort((x,y)=>rank(x)-rank(y)).slice(0,10));
+  }
+  if(mode==="weak"){
+    const wrong = QUESTIONS.filter(q=>{ const s=qStat(q.id); return s.a>0 && (s.last===0 || s.c/s.a<0.6); });
+    if(wrong.length===0) return null;
+    return shuffle(wrong).slice(0,10);
+  }
+  // random: テーマの頻出ウェイトで抽選(重複なし)
+  const pool=[]; THEMES.forEach(t=>{ QUESTIONS.filter(q=>q.theme===t.id).forEach(q=>{ for(let i=0;i<t.weight;i++) pool.push(q.id); }); });
+  const chosen=new Set();
+  while(chosen.size<10 && chosen.size<QUESTIONS.length){ chosen.add(pool[Math.floor(Math.random()*pool.length)]); }
+  return shuffle([...chosen].map(id=>byId[id]));
+}
+
+function startQuiz(mode, themeId){
+  const list = pickQuestions(mode, themeId);
+  if(!list){ showNotice("弱点として記録された問題がまだありません。まずはテーマ別かランダムで演習しましょう。"); return; }
+  const label = mode==="theme"? themeById[themeId].name : mode==="weak"? "弱点復習" : "ランダム10問";
+  quiz = { list, idx:0, results:[], mode, themeId, label };
+  renderQuestion();
+  show("view-quiz");
+}
+
+function renderQuestion(){
+  const q = quiz.list[quiz.idx];
+  $("q-theme").textContent = themeById[q.theme].name;
+  $("q-counter").textContent = `${quiz.idx+1} / ${quiz.list.length} 問`;
+  $("q-no").textContent = `設問 ${quiz.idx+1}`;
+  $("q-text").textContent = q.q;
+  const dots = $("q-dots"); dots.innerHTML="";
+  quiz.list.forEach((_,i)=>{
+    const d=document.createElement("span");
+    d.className = "dot" + (i===quiz.idx? " now" : i<quiz.results.length? (quiz.results[i].ok? " ok":" ng") : "");
+    dots.appendChild(d);
+  });
+  const marks=["ア","イ","ウ","エ"];
+  const order = shuffle([0,1,2,3]);
+  const box = $("q-choices"); box.innerHTML="";
+  order.forEach((ci,i)=>{
+    const b=document.createElement("button");
+    b.className="choice"; b.type="button"; b.dataset.ci=ci;
+    b.innerHTML=`<span class="mark">${marks[i]}</span><span>${q.c[ci]}</span>`;
+    b.onclick=()=>answer(ci,b);
+    box.appendChild(b);
+  });
+  $("grade-mark").innerHTML="";
+  $("grade-mark").classList.remove("draw");
+  $("q-expl").classList.remove("show");
+  $("btn-next").disabled = true;
+  $("btn-next").textContent = quiz.idx===quiz.list.length-1? "採点結果へ" : "次の問題へ";
+}
+
+function answer(ci, btn){
+  const q = quiz.list[quiz.idx];
+  const ok = ci === q.a;
+  document.querySelectorAll("#q-choices .choice").forEach(b=>{
+    b.disabled=true;
+    if(Number(b.dataset.ci)===q.a) b.classList.add(ok && b===btn ? "sel-correct" : "reveal-correct");
+  });
+  if(!ok) btn.classList.add("sel-wrong");
+  // 朱色の採点マーク
+  const gm=$("grade-mark");
+  gm.innerHTML = ok
+    ? `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 12 A38 38 0 1 1 49.9 12"/></svg>`
+    : `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 22 L78 78 M78 22 L22 78"/></svg>`;
+  gm.classList.add("draw");
+  // 解説
+  $("q-verdict").textContent = ok? "正解 ○" : "不正解 ✕";
+  $("q-verdict").className = "verdict " + (ok? "ok":"ng");
+  $("q-expl-body").textContent = q.e;
+  $("q-src").textContent = q.s? "出題傾向:"+q.s : "";
+  $("q-expl").classList.add("show");
+  $("btn-next").disabled=false;
+  // 記録
+  quiz.results.push({id:q.id, ok});
+  const s = qStat(q.id);
+  DATA.q[q.id] = { a:s.a+1, c:s.c+(ok?1:0), last: ok?1:0, at: Date.now() };
+  if(!DATA.days.includes(today())) DATA.days.push(today());
+  saveData();
+  $("btn-next").focus();
+}
+
+function nextQuestion(){
+  if(quiz.idx < quiz.list.length-1){ quiz.idx++; renderQuestion(); }
+  else finishQuiz();
+}
+function quitQuiz(){
+  if(quiz.results.length>0) recordSession();
+  goHome();
+}
+function recordSession(){
+  DATA.sessions.push({ date: today(), label: quiz.label,
+    score: quiz.results.filter(r=>r.ok).length, total: quiz.results.length });
+  if(DATA.sessions.length>200) DATA.sessions = DATA.sessions.slice(-200);
+  saveData();
+}
+function finishQuiz(){
+  recordSession();
+  const score = quiz.results.filter(r=>r.ok).length, total = quiz.results.length;
+  $("r-score").textContent = score; $("r-total").textContent = total;
+  const pct = score/total*100;
+  $("r-msg").textContent = pct===100? "全問正解。この調子で次のテーマへ。" :
+    pct>=60? "合格ライン(60%)クリア。誤答の解説を読み直しておきましょう。" :
+    "合格ラインまであと少し。弱点復習モードで反復しましょう。";
+  $("r-detail").textContent = `モード:${quiz.label} ｜ 通算学習日数 ${DATA.days.length}日`;
+  const wrong = quiz.results.filter(r=>!r.ok);
+  const wr = $("r-wrong");
+  wr.innerHTML = wrong.length? `<h3>誤答の振り返り</h3>` + wrong.map(r=>{
+    const q=byId[r.id];
+    return `<div class="wrong-item"><div class="qq">${q.q}</div><div class="aa">正解:${q.c[q.a]}</div></div>`;
+  }).join("") : "";
+  show("view-result");
+}
+function retrySame(){ startQuiz(quiz.mode, quiz.themeId); }
+
+let resetArmed = false;
+async function resetData(){
+  const btn = document.querySelector(".danger-zone .link-btn");
+  if(!resetArmed){ resetArmed = true; btn.textContent = "本当に削除する(もう一度押すと確定)"; btn.style.color = "var(--shu)";
+    setTimeout(()=>{ resetArmed=false; btn.textContent="成績データをリセット"; btn.style.color=""; }, 4000); return; }
+  resetArmed = false;
+  DATA = { q:{}, sessions:[], days:[] };
+  try{ await store.del(); }catch(e){}
+  btn.textContent = "成績データをリセット"; btn.style.color="";
+  renderHome();
+}
+function showNotice(msg){
+  let n = document.getElementById("notice");
+  if(!n){ n = document.createElement("div"); n.id="notice";
+    n.style.cssText="position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;font-size:.8rem;max-width:90%;z-index:9;box-shadow:0 4px 14px rgba(0,0,0,.25)";
+    document.body.appendChild(n); }
+  n.textContent = msg; n.style.display="block";
+  clearTimeout(n._t); n._t = setTimeout(()=>{ n.style.display="none"; }, 3500);
+}
+
+// ===== 起動 =====
+window.addEventListener("error", (e)=>{
+  const el = document.getElementById("boot-error");
+  if(el){ el.style.display="block"; el.textContent = "エラーが発生しました: " + (e.message || e.error); }
+});
+(async ()=>{
+  try{
+    await loadData(); renderHome();
+    if(store.name === "memory") showNotice("このブラウザでは成績を保存できないため、今回の結果は画面を閉じると消えます。");
+  }catch(err){
+    const el = document.getElementById("boot-error");
+    if(el){ el.style.display="block"; el.textContent = "起動に失敗しました: " + err.message; }
+  }
+})();
+
+</script>
+</body>
+</html>
