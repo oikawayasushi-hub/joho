@@ -14,7 +14,7 @@
   *{box-sizing:border-box; margin:0; padding:0;}
   body{font-family:"Hiragino Sans","Yu Gothic UI","Meiryo",sans-serif; background:var(--bg); color:var(--ink); line-height:1.7;}
   .wrap{max-width:840px; margin:0 auto; padding:16px 16px 60px;}
-  header{background:linear-gradient(135deg,#1d4ed8,#0ea5e9); color:#fff; padding:18px 16px; border-radius:0 0 18px 18px;}
+  header{background:linear-gradient(135deg,#5b21b6,#a855f7); color:#fff; padding:18px 16px; border-radius:0 0 18px 18px;}
   header h1{font-size:1.25rem;}
   header p{font-size:.85rem; opacity:.9;}
   .card{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-top:16px;}
@@ -85,12 +85,24 @@
   .foldhead{display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none;}
   .foldmark{color:var(--sub); font-size:.85rem;}
   .folded{display:none;}
-  .btn-main,.btn-sub,.btn-ghost2{display:block; width:100%; text-align:left; border:none; border-radius:var(--radius);
-    padding:14px 16px; font-size:.98rem; font-weight:700; cursor:pointer; margin-bottom:9px; line-height:1.45; font-family:inherit;}
-  .btn-main{background:var(--accent); color:#fff;}
-  .btn-sub{background:var(--accent2); color:#fff;}
-  .btn-ghost2{background:#eef2f8; color:var(--ink); border:1.5px solid #dde4ee;}
-  .btn-main small,.btn-sub small,.btn-ghost2 small{display:block; font-weight:500; font-size:.8rem; opacity:.9; margin-top:3px;}
+  .bigbtn{display:block; width:100%; text-align:left; border:none; border-radius:var(--radius); color:#fff;
+    padding:14px 16px; font-size:.98rem; font-weight:700; cursor:pointer; margin-bottom:9px; line-height:1.45;
+    font-family:inherit; box-shadow:var(--shadow); transition:transform .1s;}
+  .bigbtn:active{transform:scale(.98);}
+  .bigbtn small{display:block; font-weight:500; font-size:.8rem; opacity:.92; margin-top:3px;}
+  /* 元アプリの分野カラーをそのまま流用 */
+  .f1{background:linear-gradient(135deg,#e11d48,#f97316);}
+  .f2{background:linear-gradient(135deg,#d97706,#eab308);}
+  .f3{background:linear-gradient(135deg,#7c3aed,#6366f1);}
+  .f4{background:linear-gradient(135deg,#0891b2,#06b6d4);}
+  .f5{background:linear-gradient(135deg,#059669,#10b981);}
+  .f6{background:linear-gradient(135deg,#9333ea,#c026d3);}
+  .f7{background:linear-gradient(135deg,#be185d,#ec4899);}
+  .fmix{background:linear-gradient(135deg,#334155,#64748b);}
+  .frev{background:linear-gradient(135deg,#16a34a,#22c55e);}
+  .fmock{background:linear-gradient(135deg,#b45309,#f59e0b);}
+  .fguide{background:linear-gradient(135deg,#0369a1,#0ea5e9);}
+  .fday{background:linear-gradient(135deg,#2563eb,#3b82f6);}
   .clearbtn{background:none; border:none; color:var(--sub); font-size:.8rem; text-decoration:underline; cursor:pointer; padding:4px 0; font-family:inherit;}
   .wrongbox{background:#fff7ed; border:1.5px solid #fed7aa; border-radius:10px; padding:11px 13px; font-size:.88rem; margin-bottom:11px; line-height:1.6;}
   .htable{width:100%; border-collapse:collapse; font-size:.88rem; margin-top:10px;}
@@ -105,14 +117,21 @@
   .catrow .wt,.setrow .wt{display:block; font-size:.75rem; font-weight:500; color:var(--sub); margin-top:2px;}
   .catrow .bar{width:74px; height:7px; background:#e8edf5; border-radius:99px; overflow:hidden;}
   .catrow .bar i{display:block; height:100%; background:var(--accent);}
+  .catrow.c1 .bar i{background:#e11d48;} .catrow.c1{border-left:5px solid #e11d48;}
+  .catrow.c2 .bar i{background:#d97706;} .catrow.c2{border-left:5px solid #d97706;}
+  .catrow.c3 .bar i{background:#7c3aed;} .catrow.c3{border-left:5px solid #7c3aed;}
+  .catrow.c4 .bar i{background:#0891b2;} .catrow.c4{border-left:5px solid #0891b2;}
+  .setrow.s2{border-left:5px solid #d97706;}
+  .setrow.s3{border-left:5px solid #7c3aed;}
+  .setrow.s4{border-left:5px solid #0891b2;}
   .catrow .pct{width:40px; text-align:right; font-size:.82rem; font-weight:700; color:var(--sub);}
   .setrow .done{font-size:.78rem; font-weight:700; color:var(--ok); white-space:nowrap;}
   .guide-tabs{display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:4px;}
   .guide-tab{flex:0 0 auto; background:#eef2f8; border:1.5px solid #dde4ee; color:var(--sub);
     border-radius:99px; padding:7px 14px; font-size:.84rem; font-weight:700; cursor:pointer; white-space:nowrap; font-family:inherit;}
-  .guide-tab.active{background:var(--accent); color:#fff; border-color:var(--accent);}
-  .gsec{border-left:3px solid var(--accent); padding:2px 0 2px 13px; margin:16px 0;}
-  .gsec .lb{font-size:.86rem; font-weight:800; color:var(--accent); margin-bottom:5px;}
+  .guide-tab.active{background:var(--gc,var(--accent)); color:#fff; border-color:var(--gc,var(--accent));}
+  .gsec{border-left:3px solid var(--gc,var(--accent)); padding:2px 0 2px 13px; margin:16px 0;}
+  .gsec .lb{font-size:.86rem; font-weight:800; color:var(--gc,var(--accent)); margin-bottom:5px;}
   .gsec .tx{font-size:.89rem; line-height:1.85; white-space:pre-wrap; color:var(--ink);}
   .badge{display:inline-block; background:#eef2f8; color:var(--sub); border-radius:99px;
     padding:3px 12px; font-size:.78rem; font-weight:700; margin-bottom:6px;}
@@ -182,8 +201,9 @@ function loadStore(){ try{const s=JSON.parse(localStorage.getItem(LS_KEY)); retu
 function saveStore(){ try{localStorage.setItem(LS_KEY,JSON.stringify(store));}catch(e){} }
 function loadFold(){ try{return JSON.parse(localStorage.getItem(FOLD_KEY))||{};}catch(e){return {};} }
 function saveFold(f){ try{localStorage.setItem(FOLD_KEY,JSON.stringify(f));}catch(e){} }
-function isFolded(k){ const f=loadFold(); return f[k]===true; }
-function toggleFold(k){ const f=loadFold(); f[k]=!f[k]; saveFold(f); render(); }
+const FOLD_DEFAULT={setlist:true};   // 会話文・本番形式は初期状態で畳んでおく
+function isFolded(k){ const f=loadFold(); return f[k]===undefined ? !!FOLD_DEFAULT[k] : f[k]===true; }
+function toggleFold(k){ const f=loadFold(); f[k]=!isFolded(k); saveFold(f); render(); }
 function recordAnswer(id,ok){ if(!store.q[id])store.q[id]={c:0,w:0}; if(ok)store.q[id].c++; else store.q[id].w++; saveStore(); }
 function shuffle(a){const r=a.slice(); for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]];} return r;}
 function qById(id){ return QUESTIONS.find(q=>q.id===id); }
@@ -290,11 +310,11 @@ function viewHome(){
   if(wl.length>0){
     h+=`<div class="card"><h2>🔁 苦手だけ復習</h2>
       <div class="wrongbox">間違えた問題が <strong>${wl.length}問</strong> たまっています。<br>正解すればリストから消えます。まずはここから。</div>
-      <button class="btn-main" onclick="startMode('wrong')">苦手${Math.min(wl.length,20)}問を解く<small>間違えた回数が多い順に出題</small></button>
+      <button class="bigbtn frev" onclick="startMode('wrong')">苦手${Math.min(wl.length,20)}問を解く<small>間違えた回数が多い順に出題</small></button>
       <button class="clearbtn" onclick="clearWrong()">リストを消去する</button></div>`;
   }
   h+=`<div class="card"><h2>📚 本日の学習</h2>
-    <button class="btn-main" onclick="startMode('daily')">今日の5問（${STAGE_NAME[st]}）<small>${STAGE_DESC[st]}（約4分）</small></button>
+    <button class="bigbtn fday" onclick="startMode('daily')">今日の5問（${STAGE_NAME[st]}）<small>${STAGE_DESC[st]}（約4分）</small></button>
     <table class="htable">
       <tr><th style="width:38%">いまの段階</th><td class="n">${STAGE_NAME[st]}${st<2?"（3段階中"+(st+1)+"）":""}</td></tr>
       <tr><th>累計</th><td class="n">${ts.t}問 ／ 正答率 ${ts.t?Math.round(ts.o/ts.t*100)+"%":"—"}</td></tr>
@@ -304,7 +324,7 @@ function viewHome(){
     <div class="${isFolded("daimon")?"folded":""}">`;
   [1,2,3,4].forEach(d=>{
     const info=DAIMON[d], total=daimonPool(d).length, rate=daimonRate(d);
-    h+=`<div class="catrow" onclick="startMode('daimon',${d})">
+    h+=`<div class="catrow c${d}" onclick="startMode('daimon',${d})">
       <div class="nm">${info.icon} ${info.name}<span class="wt">${info.pt}　全${total}問</span></div>
       <div class="bar"><i style="width:${rate===null?0:rate}%"></i></div>
       <div class="pct">${rate===null?"—":rate+"%"}</div></div>`;
@@ -316,32 +336,33 @@ function viewHome(){
     <div class="${isFolded("setlist")?"folded":""}">`;
   sets.forEach(s=>{
     const done=setDone(s.id);
-    h+=`<div class="setrow" onclick="startMode('set','${s.id}')">
+    h+=`<div class="setrow s${s.d}" onclick="startMode('set','${s.id}')">
       <div class="nm">${escapeHtml(s.title)}<span class="wt">第${s.d}問形式　${s.n}問${s.img?"　📊図あり":""}　${s.kind}</span></div>
       ${done?`<div class="done">${done}</div>`:""}</div>`;
   });
   h+=`<div class="note" style="margin-top:10px;">リード文を読んで、続けて出題される複数の設問に答えます。本番の第3問・第4問はこの形式で出題されます。</div></div></div>`;
   h+=`<div class="card"><h2>📖 出題傾向と対策</h2>
-    <button class="btn-main" onclick="goToGuide()">大問別・出題傾向と対策<small>配点・頻出テーマ・計算の型・時間配分</small></button></div>`;
+    <button class="bigbtn fguide" onclick="goToGuide()">大問別・出題傾向と対策<small>配点・頻出テーマ・計算の型・時間配分</small></button></div>`;
   h+=`<div class="card"><h2>📐 標準問題演習</h2>
-    <button class="btn-sub" onclick="startMode('standard')">標準問題（20問ランダム）<small>計算・考察問題に強くなる（約20分）</small></button>
-    <button class="btn-ghost2" onclick="startMode('mix')">全分野ミックス（12問）<small>すべての分野・形式からランダムに出題</small></button></div>`;
+    <button class="bigbtn f5" onclick="startMode('standard')">標準問題（20問ランダム）<small>計算・考察問題に強くなる（約20分）</small></button>
+    <button class="bigbtn fmix" onclick="startMode('mix')">全分野ミックス（12問）<small>すべての分野・形式からランダムに出題</small></button></div>`;
   h+=`<div class="card"><h2>⏱️ 実力確認テスト</h2>
-    <button class="btn-ghost2" onclick="startMode('test30')">簡易版 30問<small>7割ライン判定（約20分）</small></button>
-    <button class="btn-main" onclick="startMode('mock')">共通テスト模試<small>60分・100点満点・本番の配点で採点</small></button></div>`;
+    <button class="bigbtn f6" onclick="startMode('test30')">簡易版 30問<small>7割ライン判定（約20分）</small></button>
+    <button class="bigbtn fmock" onclick="startMode('mock')">共通テスト模試<small>60分・100点満点・本番の配点で採点</small></button></div>`;
   h+=`<div class="card"><h2>🎯 発展トレーニング</h2>
-    <button class="btn-ghost2" onclick="startMode('challenge')">発展問題（15問ランダム）<small>難度の高い問題だけを集中演習</small></button></div>`;
+    <button class="bigbtn f7" onclick="startMode('challenge')">発展問題（15問ランダム）<small>難度の高い問題だけを集中演習</small></button></div>`;
   return h;
 }
 function viewGuide(){
   const g=GUIDES[state.guideChapter-1];
   const labels=["第1問","第2問","第3問","第4問","本番"];
-  let h=`<div class="card"><button class="backbtn" onclick="goHome()">← ホームへ</button>
+  const GC=["#e11d48","#d97706","#7c3aed","#0891b2","#b45309"];
+  let h=`<div class="card" style="--gc:${GC[state.guideChapter-1]}"><button class="backbtn" onclick="goHome()">← ホームへ</button>
     <div class="guide-tabs">`;
   labels.forEach((l,i)=>{ h+=`<button class="guide-tab ${state.guideChapter===i+1?"active":""}" onclick="switchGuideChapter(${i+1})">${l}</button>`; });
   h+=`</div><div class="badge">${g.badge}</div><h2>${g.icon} ${escapeHtml(g.title)}</h2>`;
   g.sections.forEach(s=>{ h+=`<div class="gsec"><div class="lb">${escapeHtml(s.label)}</div><div class="tx">${escapeHtml(s.text)}</div></div>`; });
-  h+=`<button class="btn-ghost2" style="margin-top:14px" onclick="goHome()">ホームへもどる</button></div>`;
+  h+=`<button class="bigbtn fmix" style="margin-top:14px" onclick="goHome()">ホームへもどる</button></div>`;
   return h;
 }
 
